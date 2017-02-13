@@ -112,6 +112,16 @@ public class MapReadyCallback implements OnMapReadyCallback {
             }
         });
 
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                marker.showInfoWindow();
+                MoveGentlyToPosition(marker.getPosition(),18);
+                return true;
+            }
+        });
+
 
         View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
 

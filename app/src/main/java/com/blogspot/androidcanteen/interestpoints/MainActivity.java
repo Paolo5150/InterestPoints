@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    Initialize();
+
 
                 } else {
 
@@ -235,6 +235,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         GlobalVariables.LogWithTag("Connection was OKKK");
         mapCall.startLocationRequest();
         mGoogleApiClientStatic = mGoogleApiClient;
+
+        Initialize();
 
 
     }

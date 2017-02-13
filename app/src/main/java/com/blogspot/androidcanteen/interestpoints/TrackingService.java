@@ -21,6 +21,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.List;
 
 /**
  * Created by Paolo on 13/02/2017.
@@ -59,7 +62,7 @@ public class TrackingService extends Service {
         trackingNotification = new Notification.Builder(this)
                 .setContentTitle("InterestPoints")
                 .setContentText("Tracking is on")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
                 .setContentIntent(pIntent)
                 .setAutoCancel(true).build();
 
@@ -73,6 +76,21 @@ public class TrackingService extends Service {
             public void onLocationChanged(Location location) {
 
                 GlobalVariables.LogWithTag("Location changed in service");
+
+                List<InterestPoint> points = IPDatabase.getInstance().GetAllPoints();
+
+                for(InterestPoint p : points)
+                {
+                    double distance = GlobalVariables.CalculationByDistance(p.getLatLng(),new LatLng(location.getLatitude(),location.getLongitude()));
+                    GlobalVariables.LogWithTag("Distance from " + p.title + ": " + distance);
+
+                    if(distance < 0.350 && p.notifyWhenClose)
+                    {
+
+                     NotifyOfBeingClose(p);
+
+                    }
+                }
 
             }
 
@@ -99,6 +117,19 @@ public class TrackingService extends Service {
         startLocationRequest();
 
         return START_STICKY;
+    }
+
+    private void NotifyOfBeingClose(InterestPoint p) {
+
+        Notification not = new Notification.Builder(this)
+                .setContentTitle(p.title + " is close to you!")
+                .setContentText("Click to get directions")
+                .setSmallIcon(R.drawable.noticon)
+                .setVibrate(new long[]{0,150,100,150,100,500})
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true).build();
+
+        notManager.notify(p.id,not);
     }
 
     @Nullable
