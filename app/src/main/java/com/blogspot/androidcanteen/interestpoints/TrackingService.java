@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -31,20 +33,32 @@ import java.util.List;
 
 public class TrackingService extends Service {
 
+    public static boolean isTracking = false;
+
     LocationManager locationManager;
+
     android.location.LocationListener gpsListener;
+    android.location.LocationListener netListener;
+
 
     public final int TRACKING_NOTIFICATION_ID = 1986;
+    public static final int GPS_NOTIFICATION_ID = 3011;
     Notification trackingNotification;
+    Notification gpsOffNotification;
     NotificationManager notManager;
+    Uri notificationsound;
+
 
     @Override
     public int onStartCommand(Intent intent2, int flags, int startId) {
 
         GlobalVariables.ToastShort("Tracking started");
+        isTracking = true;
 
         locationManager = (LocationManager) MainActivity.appCont.getSystemService(Context.LOCATION_SERVICE);
         notManager = (NotificationManager) MainActivity.appCont.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationsound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         /*
         Intent
@@ -62,61 +76,43 @@ public class TrackingService extends Service {
         trackingNotification = new Notification.Builder(this)
                 .setContentTitle("InterestPoints")
                 .setContentText("Tracking is on")
+                .setSound(notificationsound)
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)
                 .setContentIntent(pIntent)
                 .setAutoCancel(true).build();
 
         trackingNotification.flags = Notification.FLAG_ONGOING_EVENT;
 
-        notManager.notify(TRACKING_NOTIFICATION_ID,trackingNotification);
+       // notManager.notify(TRACKING_NOTIFICATION_ID,trackingNotification);
 
+        startForeground(TRACKING_NOTIFICATION_ID,trackingNotification);
 
-        gpsListener = new android.location.LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-                GlobalVariables.LogWithTag("Location changed in service");
-
-                List<InterestPoint> points = IPDatabase.getInstance().GetAllPoints();
-
-                for(InterestPoint p : points)
-                {
-                    double distance = GlobalVariables.CalculationByDistance(p.getLatLng(),new LatLng(location.getLatitude(),location.getLongitude()));
-                    GlobalVariables.LogWithTag("Distance from " + p.title + ": " + distance);
-
-                    if(distance < 0.350 && p.notifyWhenClose)
-                    {
-
-                     NotifyOfBeingClose(p);
-
-                    }
-                }
-
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-                GlobalVariables.LogWithTag("GPS enabled");
-
-                //Will resume request automatically
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-                GlobalVariables.LogWithTag("GPS disabled");
-
-            }
-        };
+    SetUpListeners();
 
 
         startLocationRequest();
 
         return START_STICKY;
+    }
+
+    private void CalculateDistance(Location location) {
+
+
+
+        List<InterestPoint> points = IPDatabase.getInstance().GetAllPoints();
+
+        for(InterestPoint p : points)
+        {
+            float distance = GlobalVariables.distFrom(p.getLatLng(),new LatLng(location.getLatitude(),location.getLongitude()));
+            GlobalVariables.LogWithTag("Distance from " + p.title + ": " + distance);
+
+            if(distance < MyOptions.meterRange && p.notifyWhenClose)
+            {
+
+                NotifyOfBeingClose(p);
+
+            }
+        }
     }
 
     private void NotifyOfBeingClose(InterestPoint p) {
@@ -125,6 +121,7 @@ public class TrackingService extends Service {
                 .setContentTitle(p.title + " is close to you!")
                 .setContentText("Click to get directions")
                 .setSmallIcon(R.drawable.noticon)
+                .setSound(notificationsound)
                 .setVibrate(new long[]{0,150,100,150,100,500})
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(true).build();
@@ -150,7 +147,8 @@ public class TrackingService extends Service {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, gpsListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, gpsListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, netListener);
 
     }
 
@@ -166,6 +164,105 @@ public class TrackingService extends Service {
             return;
         }
         locationManager.removeUpdates(gpsListener);
+        locationManager.removeUpdates(netListener);
+    }
+
+    void RemoveLocationNotification()
+    {
+               notManager.cancel(TrackingService.GPS_NOTIFICATION_ID);
+    }
+
+    public void SetUpListeners()
+    {
+
+
+
+        netListener = new android.location.LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                GlobalVariables.LogWithTag("Location changed in NET in SERVICE");
+                CalculateDistance(location);
+
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                RemoveLocationNotification();
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+
+
+            }
+        };
+
+
+
+        gpsListener = new android.location.LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                GlobalVariables.LogWithTag("Location changed in GPS by in SERVICE");
+                CalculateDistance(location);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                GlobalVariables.LogWithTag("Provider enabled again in service");
+                RemoveLocationNotification();
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                GlobalVariables.LogWithTag("Provider disabled");
+
+                NotifyOfProviderDisabled();
+
+
+
+            }
+        };
+    }
+
+    private void NotifyOfProviderDisabled() {
+
+        Intent gpsOptionsIntent = new Intent(
+                android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+
+        gpsOptionsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(TrackingService.this);
+
+        // stackBuilder.addParentStack(MainActivity.class);
+
+        stackBuilder.addNextIntent(gpsOptionsIntent);
+        PendingIntent pi =stackBuilder.getPendingIntent(GPS_NOTIFICATION_ID,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        gpsOffNotification = new Notification.Builder(TrackingService.this)
+                .setContentTitle("Location is off!")
+                .setContentText("Click to turn the GPS on")
+                .setContentIntent(pi)
+
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .setVibrate(new long[]{0,150,100,150,100,500})
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true).build();
+
+
+        notManager.notify(GPS_NOTIFICATION_ID,gpsOffNotification);
     }
 
     @Override
@@ -174,6 +271,7 @@ public class TrackingService extends Service {
         GlobalVariables.LogWithTag("Service stop");
         GlobalVariables.ToastShort("Tracking stopped");
         stopLocationRequest();
+        isTracking = false;
         notManager.cancel(TRACKING_NOTIFICATION_ID);
         super.onDestroy();
     }

@@ -62,39 +62,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .build();
 
-        mGoogleApiClient.registerConnectionCallbacks(this);
+
+        mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFrag);
+        mapCall = new MapReadyCallback(MainActivity.this,mapFrag,mGoogleApiClient);
 
         autocompleteFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
-        CheckPermission();
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-    }
-
-    public void onResume()
-    {
-        super.onResume();
-
-        stopService(new Intent(MainActivity.this,TrackingService.class));
-
-    }
-
-    public void Initialize() {
-
-
-        mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFrag);
-        mGoogleApiClient.connect();
-       mapCall = new MapReadyCallback(MainActivity.this, mapFrag,mGoogleApiClient);
-        mapFrag.getMapAsync(mapCall);
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -110,6 +83,42 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             }
         });
+
+
+        CheckPermission();
+
+
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+    }
+
+    public void onResume()
+    {
+        super.onResume();
+        stopService(new Intent(MainActivity.this,TrackingService.class));
+    }
+
+
+
+    public void Initialize() {
+
+GlobalVariables.LogWithTag("Initialization");
+
+        mGoogleApiClient.registerConnectionCallbacks(this); //Will connect
+
+        mapFrag.getMapAsync(mapCall);
+
+
+
+        if(MapReadyCallback.useLocationManager)
+            mapCall.startLocationRequest();
 
 
     }
@@ -138,14 +147,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0)
+                {
+                    if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
+                       Initialize();
 
+                    }
+                    else
+                        finish();
+                }else {
 
-                } else {
-
-                    finish();
+                    //Do nothing, wait for user to chose
                 }
                 return;
             }
@@ -157,6 +170,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     protected void onStop() {
+
+        mapCall.stopLocationRequest();
         if( mGoogleApiClient != null && mGoogleApiClient.isConnected() ) {
             mGoogleApiClient.disconnect();
         }
@@ -164,8 +179,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     protected void onStart() {
-        if( mGoogleApiClient !=null )
+        GlobalVariables.LogWithTag("Start");
+        if(mGoogleApiClient!=null && !mGoogleApiClient.isConnected())
             mGoogleApiClient.connect();
+
 
         super.onStart();
     }
@@ -176,29 +193,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    Manifest.permission.READ_CONTACTS)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
 
                 // No explanation needed, we can request the permission.
 
                 ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                 // app-defined int constant. The callback method gets the
                 // result of the request.
             }
-        }
         else
             Initialize();
+
+
+
     }
 
     @Override
@@ -232,11 +242,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
-        GlobalVariables.LogWithTag("Connection was OKKK");
-        mapCall.startLocationRequest();
+        GlobalVariables.LogWithTag("Connection was OKKK, boolean is " + MapReadyCallback.useLocationManager);
+
         mGoogleApiClientStatic = mGoogleApiClient;
 
-        Initialize();
+
+
+        if(!MapReadyCallback.useLocationManager) {
+
+          if(!mapCall.requestingUpdates)
+            mapCall.startLocationRequest();
+            GlobalVariables.LogWithTag("Request made in connection");
+        }
+
+
 
 
     }
