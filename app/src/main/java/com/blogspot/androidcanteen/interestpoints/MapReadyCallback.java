@@ -151,6 +151,8 @@ public class MapReadyCallback implements OnMapReadyCallback {
         if(range!=null)
             range.remove();
 
+
+
         userCircle = map.addCircle(new CircleOptions().zIndex(1000).strokeWidth(2).strokeColor(Color.YELLOW).radius(3).fillColor(Color.BLUE).center(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
         range = map.addCircle(new CircleOptions().radius(MyOptions.meterRange).fillColor(Color.argb(80,160,160,160)).center(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
 
