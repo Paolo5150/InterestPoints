@@ -1,6 +1,8 @@
 package com.blogspot.androidcanteen.interestpoints;
 
+import android.content.Context;
 import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Toast;
@@ -34,6 +36,12 @@ public class GlobalVariables {
         return px;
     }
 
+    public static float convertPixelsToDp(float px, Context context){
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        float dp = px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        return dp;
+    }
     public static double CalculationByDistance(LatLng StartP, LatLng EndP) {
         int Radius = 6371;// radius of earth in Km
         double lat1 = StartP.latitude;

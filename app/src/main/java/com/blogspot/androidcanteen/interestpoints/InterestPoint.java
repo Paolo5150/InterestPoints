@@ -8,23 +8,20 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class InterestPoint {
 
+
     public String title;
+
     public String description;
     public String lat;
     public String lng;
     public boolean notifyWhenClose;
-    public int id;
+    public String id;
 
-    public InterestPoint(String title,String description, String lat, String lng, boolean notifyWhenClose ) {
-        this.description = description;
-        this.lat = lat;
-        this.lng = lng;
-        this.notifyWhenClose = notifyWhenClose;
-        this.title = title;
-    }
 
-    public InterestPoint(int id, String title,String description, String lat, String lng, boolean notifyWhenClose) {
+
+    public InterestPoint(String id,String title,String description, String lat, String lng, boolean notifyWhenClose) {
         this.id = id;
+
         this.description = description;
         this.lat = lat;
         this.lng = lng;
@@ -38,4 +35,9 @@ public class InterestPoint {
     }
 
 
+    @Override
+    public String toString() {
+
+        return title + " - " + description + " - " +  notifyWhenClose;
+    }
 }

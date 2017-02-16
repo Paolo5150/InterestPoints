@@ -32,6 +32,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1111;
@@ -95,6 +97,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onClick(View view) {
 
+                Intent toList = new Intent(MainActivity.this, PointListActivity.class);
+                startActivity(toList);
+
             }
         });
     }
@@ -103,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     {
         super.onResume();
         stopService(new Intent(MainActivity.this,TrackingService.class));
+
+        if(mapCall!=null && mapCall.map!=null)
+            mapCall.UpdateMarkers();
     }
 
 
@@ -135,10 +143,26 @@ GlobalVariables.LogWithTag("Initialization");
 
     private void SavePlace(Place place)
     {
-        InterestPoint point = new InterestPoint(place.getName().toString(),"Description",String.valueOf(place.getLatLng().latitude),String.valueOf(place.getLatLng().longitude),true);
+        
+        InterestPoint point = new InterestPoint(place.getId(),place.getName().toString(),"Description",String.valueOf(place.getLatLng().latitude),String.valueOf(place.getLatLng().longitude),true);
 
+        List<InterestPoint> allPoints = IPDatabase.getInstance().GetAllPoints();
+
+        boolean foundIt = false;
+        for(InterestPoint p : allPoints)
+        {
+           if(p.title.equalsIgnoreCase(point.title)) {
+               foundIt = true;
+              // GlobalVariables.LogWithTag("Found a copy");
+               break;
+           }
+        }
+
+        if(!foundIt)
+        {
         IPDatabase.getInstance().AddInterestPoint(point);
-        mapCall.UpdateMarkers();
+        mapCall.UpdateMarkers();}
+
         mapCall.MoveGentlyToPosition(place.getLatLng(),18);
     }
 

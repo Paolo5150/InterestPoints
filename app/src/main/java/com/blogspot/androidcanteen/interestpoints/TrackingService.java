@@ -126,7 +126,7 @@ public class TrackingService extends Service {
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(true).build();
 
-        notManager.notify(p.id,not);
+        notManager.notify(p.id.hashCode(),not);
     }
 
     @Nullable

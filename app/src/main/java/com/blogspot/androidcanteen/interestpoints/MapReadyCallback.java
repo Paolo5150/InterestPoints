@@ -34,6 +34,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -335,7 +336,10 @@ public class MapReadyCallback implements OnMapReadyCallback {
         map.clear();
         for(InterestPoint p : points)
         {
-            map.addMarker(new MarkerOptions().title(p.title).position(p.getLatLng()));
+            if(p.notifyWhenClose)
+            map.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title(p.title).position(p.getLatLng()));
+            else
+                map.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title(p.title).position(p.getLatLng()));
         }
 
         if(currentLocation!=null)

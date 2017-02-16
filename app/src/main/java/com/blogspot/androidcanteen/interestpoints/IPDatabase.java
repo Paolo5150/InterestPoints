@@ -22,6 +22,7 @@ public class IPDatabase extends SQLiteOpenHelper {
 
 
     public String COLUMN_ID = "id";
+    public String COLUMN_LINK = "link";
     public String COLUMN_TITLE = "title";
     public String COLUMN_DESCRIPTION = "description";
     public String COLUMN_LATITUDE = "latitude";
@@ -51,7 +52,7 @@ public static IPDatabase getInstance()
 
 
         String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "("
-                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," // cursror 0
+                + COLUMN_ID + " TEXT PRIMARY KEY," // cursror 0
                 + COLUMN_TITLE + " TEXT,"                           // cursror 1
                 + COLUMN_DESCRIPTION + " TEXT, "                          // cursror 2
                 + COLUMN_LATITUDE + " TEXT, "                          // cursror 2
@@ -64,11 +65,38 @@ public static IPDatabase getInstance()
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        GlobalVariables.LogWithTag("Upgrade called");
+    }
+
+    public boolean ReplacePointBoolean(String id,boolean value)
+    {
+       db = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+        GlobalVariables.LogWithTag("Value passed is " + value);
+
+
+        cv.put(COLUMN_NOTIFY, String.valueOf(value));
+
+
+       return  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
+      //  db.replace(TABLE_NAME,null,cv);
+        //db.close();
+
+      /*  InterestPoint p = getPointById(id);
+
+        if(p!=null)
+        {
+            GlobalVariables.LogWithTag(p.title + " boolean in database is " + p.notifyWhenClose);
+        }*/
+
 
     }
 
     public List<InterestPoint> GetAllPoints()
     {
+
+
         List<InterestPoint> list = new ArrayList<>();
 db = getReadableDatabase();
 
@@ -77,7 +105,7 @@ db = getReadableDatabase();
         if (cursor .moveToFirst()) {
             while (cursor.isAfterLast() == false) {
 
-                InterestPoint p = new InterestPoint(cursor.getInt(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),Boolean.parseBoolean(cursor.getString(5)));
+                InterestPoint p = new InterestPoint(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),Boolean.parseBoolean(cursor.getString(5)));
                 list.add(p);
 
 
@@ -93,7 +121,7 @@ db = getReadableDatabase();
         List<InterestPoint> list = GetAllPoints();
 
         for(InterestPoint p : list)
-            GlobalVariables.LogWithTag(p.title);
+            GlobalVariables.LogWithTag(p.toString());
     }
 
     public void printAllTables()
@@ -109,13 +137,57 @@ db = getReadableDatabase();
         }
     }
 
-    public void DeleteInterestPointByTitle(String t)
+    public void DeleteInterestPointById(String id)
     {
+        InterestPoint p = getPointById(id);
          db = getWritableDatabase();
 
-        db.delete(TABLE_NAME,COLUMN_TITLE + " = ?",new String[]{t});
+        db.delete(TABLE_NAME,COLUMN_ID + " = ?",new String[]{id});
         db.close();
 
+        GlobalVariables.ToastShort(p.title + " deleted");
+
+    }
+
+    public void DeleteInterestPointByTitle(String title)
+    {
+        InterestPoint p = getPointByTitle(title);
+        db = getWritableDatabase();
+
+        db.delete(TABLE_NAME,COLUMN_TITLE + " = ?",new String[]{title});
+        db.close();
+
+        GlobalVariables.ToastShort(p.title + " deleted");
+
+    }
+
+    public InterestPoint getPointByTitle(String title)
+    {
+        List<InterestPoint> allPoints = GetAllPoints();
+
+        for(InterestPoint p : allPoints)
+        {
+            if(p.title.equalsIgnoreCase(title))
+                return p;
+        }
+
+        return null;
+    }
+
+    public InterestPoint getPointById(String id)
+    {
+        List<InterestPoint> allPoints = GetAllPoints();
+    InterestPoint point = null;
+        for(InterestPoint p : allPoints)
+        {
+            if(p.id.equalsIgnoreCase(id)) {
+                point = p;
+
+            }
+        }
+
+
+        return point;
     }
 
     public void AddInterestPoint(InterestPoint ip)
@@ -123,6 +195,7 @@ db = getReadableDatabase();
         ContentValues cv = new ContentValues();
 
         cv.put(COLUMN_TITLE,ip.title);
+        cv.put(COLUMN_ID,ip.id);
         cv.put(COLUMN_DESCRIPTION,ip.description);
         cv.put(COLUMN_LATITUDE,ip.lat);
         cv.put(COLUMN_LONGITUDE,ip.lng);
