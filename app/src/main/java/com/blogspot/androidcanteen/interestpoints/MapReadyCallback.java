@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -222,9 +223,15 @@ public class MapReadyCallback implements OnMapReadyCallback {
             public void onClick(View v) {
 
 
+
+
+                if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                {
+                    GlobalVariables.ToastShort("Please turn location on");
+                    return;
+                }
+
                 if (currentLocation != null) {
-
-
 
                     MoveGentlyToPosition(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 18);
                 }
@@ -246,6 +253,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
                 act.stopService(toTracking);
 
 
+                act.finish();
                 return true;
             }
         });

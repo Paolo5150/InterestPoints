@@ -17,7 +17,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -25,6 +27,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +50,8 @@ public class TrackingService extends Service {
     Notification gpsOffNotification;
     NotificationManager notManager;
     Uri notificationsound;
-
+    List<InterestPoint> points;
+    List<InterestPoint> closePoints;
 
     @Override
     public int onStartCommand(Intent intent2, int flags, int startId) {
@@ -59,6 +63,9 @@ public class TrackingService extends Service {
         notManager = (NotificationManager) MainActivity.appCont.getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationsound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        points = IPDatabase.getInstance().GetAllPoints();
+        closePoints = new ArrayList<>();
 
         /*
         Intent
@@ -99,7 +106,7 @@ public class TrackingService extends Service {
 
 
 
-        List<InterestPoint> points = IPDatabase.getInstance().GetAllPoints();
+
 
         for(InterestPoint p : points)
         {
@@ -108,25 +115,51 @@ public class TrackingService extends Service {
 
             if(distance < MyOptions.meterRange && p.notifyWhenClose)
             {
-
-                NotifyOfBeingClose(p);
+                closePoints.add(p);
 
             }
         }
+
+        for(InterestPoint p : closePoints)
+        NotifyOfBeingClose(p);
+
+        closePoints.clear();
     }
 
     private void NotifyOfBeingClose(InterestPoint p) {
 
-        Notification not = new Notification.Builder(this)
+       /* Intent direction = new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse("http://maps.google.com/maps?daddr=" + p.lat +"," + p.lng));
+
+        PendingIntent pDir =PendingIntent.getActivity(getApplicationContext(),p.id.hashCode(),direction,0);*/
+
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse("http://maps.google.com/maps?&daddr="+p.lat+","+p.lng));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER );
+        intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+
+        PendingIntent pDir =PendingIntent.getActivity(getApplicationContext(),p.id.hashCode(),intent,0);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+        Notification not = mBuilder
                 .setContentTitle(p.title + " is close to you!")
                 .setContentText("Click to get directions")
+                .setContentIntent(pDir)
                 .setSmallIcon(R.drawable.noticon)
                 .setSound(notificationsound)
                 .setVibrate(new long[]{0,150,100,150,100,500})
                 .setOnlyAlertOnce(true)
-                .setAutoCancel(true).build();
+                .build();
 
+
+
+
+        not.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_AUTO_CANCEL;
         notManager.notify(p.id.hashCode(),not);
+
+        //Stop notification
+        points.remove(p);
+
     }
 
     @Nullable
@@ -263,6 +296,9 @@ public class TrackingService extends Service {
 
 
         notManager.notify(GPS_NOTIFICATION_ID,gpsOffNotification);
+
+   
+
     }
 
     @Override
@@ -273,6 +309,18 @@ public class TrackingService extends Service {
         stopLocationRequest();
         isTracking = false;
         notManager.cancel(TRACKING_NOTIFICATION_ID);
+
+        Notification not = new Notification.Builder(this)
+                .setContentTitle("Tracking was interrupted")
+
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                           .setVibrate(new long[]{0,150,100,150,100,500})
+                .setOnlyAlertOnce(true)
+                .setSound(notificationsound)
+                .setAutoCancel(true).build();
+
+        notManager.notify(1234,not);
+
         super.onDestroy();
     }
 }

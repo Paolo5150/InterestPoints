@@ -5,10 +5,8 @@
 
       <shape>
 
-          <gradient
-              android:angle="315"
-              android:startColor="#eeeeee"
-              android:endColor="#757575"/>
+        <solid
+            android:color="#aaFFee"/>
 
           <stroke
               android:width="2dp"
