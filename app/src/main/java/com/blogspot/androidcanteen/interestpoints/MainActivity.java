@@ -1,6 +1,8 @@
 package com.blogspot.androidcanteen.interestpoints;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,11 +12,14 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -24,6 +29,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
@@ -37,6 +43,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1111;
+    final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1268;
 
     public static Context appCont;
 
@@ -45,13 +52,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public static GoogleApiClient mGoogleApiClient;
     MapReadyCallback mapCall;
     PlaceAutocompleteFragment autocompleteFragment;
-
+    Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-      //  Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+        toolbar   = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
 
         appCont = MainActivity.this;
@@ -69,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFrag);
         mapCall = new MapReadyCallback(MainActivity.this,mapFrag,mGoogleApiClient);
 
-        autocompleteFragment = (PlaceAutocompleteFragment)
+    /*    autocompleteFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -85,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 // TODO: Handle the error.
 
             }
-        });
+        });*/
 
 
         CheckPermission();
@@ -98,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onClick(View view) {
 
                 Intent toList = new Intent(MainActivity.this, PointListActivity.class);
-                startActivity(toList);
+                startActivityForResult(toList,1000);
 
             }
         });
@@ -119,6 +126,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 GlobalVariables.LogWithTag("Initialization");
 
+      SetUpToolbar();
+
+
+
         mGoogleApiClient.registerConnectionCallbacks(this); //Will connect
 
         mapFrag.getMapAsync(mapCall);
@@ -131,7 +142,66 @@ GlobalVariables.LogWithTag("Initialization");
 
     }
 
+    private void SetUpToolbar() {
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(getLayoutInflater().inflate(R.layout.toolbar_items,null));
+
+        View v = getSupportActionBar().getCustomView();
+        ViewGroup.LayoutParams lp = v.getLayoutParams();
+        lp.width = Toolbar.LayoutParams.MATCH_PARENT; //Important
+        v.setLayoutParams(lp);
+
+
+        //Track button
+        TextView track = (TextView) getSupportActionBar().getCustomView().findViewById(R.id.toolbarTrack);
+
+        track.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent toTracking = new Intent(MainActivity.this, TrackingService.class);
+
+
+                if(!TrackingService.isTracking)
+                    startService(toTracking);
+                else
+                    stopService(toTracking);
+
+
+                finish();
+            }
+        });
+
+        //Search button
+
+        TextView search = (TextView) getSupportActionBar().getCustomView().findViewById(R.id.toolbarSearch);
+
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+
+                try {
+                    Intent intent =
+                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                                    .build(MainActivity.this);
+                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                } catch (GooglePlayServicesRepairableException e) {
+                    // TODO: Handle the error.
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    // TODO: Handle the error.
+                }
+            }
+        });
+    }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+
+        //Place picker result
         if (requestCode == MapReadyCallback.PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(data, this);
@@ -139,31 +209,66 @@ GlobalVariables.LogWithTag("Initialization");
                 SavePlace(place);
             }
         }
-    }
 
-    private void SavePlace(Place place)
-    {
-        
-        InterestPoint point = new InterestPoint(place.getId(),place.getName().toString(),"Description",String.valueOf(place.getLatLng().latitude),String.valueOf(place.getLatLng().longitude),true);
 
-        List<InterestPoint> allPoints = IPDatabase.getInstance().GetAllPoints();
+        //Autocomplete places result
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+                SavePlace(place);
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
 
-        boolean foundIt = false;
-        for(InterestPoint p : allPoints)
-        {
-           if(p.title.equalsIgnoreCase(point.title)) {
-               foundIt = true;
-              // GlobalVariables.LogWithTag("Found a copy");
-               break;
-           }
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
         }
 
-        if(!foundIt)
-        {
-        IPDatabase.getInstance().AddInterestPoint(point);
-        mapCall.UpdateMarkers();}
 
-        mapCall.MoveGentlyToPosition(place.getLatLng(),18);
+        //Data returned fomr PointListActivity with the title of the place selected which will be shown on the map
+        if(resultCode == RecyclerAdapter.VIEW_ON_MAP_REQUEST)
+        {
+           // GlobalVariables.LogWithTag("Main activity got: " + data.getStringExtra("place_title"));
+          InterestPoint point = IPDatabase.getInstance().getPointByTitle(data.getStringExtra("place_title"));
+
+            mapCall.MoveGentlyToPosition(point.getLatLng(),18);
+        }
+    }
+
+    private void SavePlace(final Place place)
+    {
+
+        NewPlaceDialog d = new NewPlaceDialog(MainActivity.this, new IDialogListener() {
+            @Override
+            public void OnOKButtonPressed(String description) {
+
+                GlobalVariables.LogWithTag("Description returned: " + description);
+
+                InterestPoint point = new InterestPoint(place.getId(),place.getName().toString(),description,String.valueOf(place.getLatLng().latitude),String.valueOf(place.getLatLng().longitude),true);
+
+                List<InterestPoint> allPoints = IPDatabase.getInstance().GetAllPoints();
+
+                boolean foundIt = false;
+                for(InterestPoint p : allPoints)
+                {
+                    if(p.title.equalsIgnoreCase(point.title)) {
+                        foundIt = true;
+                        // GlobalVariables.LogWithTag("Found a copy");
+                        break;
+                    }
+                }
+
+                if(!foundIt)
+                {
+                    IPDatabase.getInstance().AddInterestPoint(point);
+                    mapCall.UpdateMarkers();}
+
+                mapCall.MoveGentlyToPosition(place.getLatLng(),18);
+
+            }
+        });
+        
+
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -235,14 +340,14 @@ GlobalVariables.LogWithTag("Initialization");
 
     }
 
-    @Override
+  /*  @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+      //  getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
-    }
+    }*/
 
-    @Override
+ /*   @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -255,7 +360,7 @@ GlobalVariables.LogWithTag("Initialization");
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
 
     @Override

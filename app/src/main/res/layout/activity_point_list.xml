@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             app:srcCompat="@drawable/wm2"
             android:id="@+id/background_two"
-            android:alpha="0.2" />
+            android:alpha="0.1" />
 
         <ImageView
             android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
             app:srcCompat="@drawable/wm2"
             android:id="@+id/backgroun_one"
             android:scaleType="fitCenter"
-            android:alpha="0.2" />
+            android:alpha="0.1" />
     </FrameLayout>
 
     <android.support.v7.widget.RecyclerView

@@ -164,7 +164,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
     public void onMapReady(final GoogleMap googleMap) {
 
 
-        GlobalVariables.LogWithTag("Map ready");
+    //    GlobalVariables.LogWithTag("Map ready");
 
         mapPadding = GlobalVariables.DpToPx(60);
 
@@ -239,14 +239,16 @@ public class MapReadyCallback implements OnMapReadyCallback {
             }
         });
 
-        locationButton.setOnLongClickListener(new View.OnLongClickListener() {
+      /*  locationButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
 
-                GlobalVariables.LogWithTag("Long click " + googleApiClient.isConnected());
+             //   GlobalVariables.LogWithTag("Long click " + googleApiClient.isConnected());
 
 
                 toTracking = new Intent(act, TrackingService.class);
+
+
                 if(!TrackingService.isTracking)
                 act.startService(toTracking);
                 else
@@ -256,7 +258,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
                 act.finish();
                 return true;
             }
-        });
+        });*/
 
 
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -326,7 +328,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
            locationManager.removeUpdates(netListener);
             locationManager.removeUpdates(gpsListener);
 
-            GlobalVariables.LogWithTag("Local manager in activity update stopped");
+         //   GlobalVariables.LogWithTag("Local manager in activity update stopped");
         }
         else
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, locationListener);
@@ -359,7 +361,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                GlobalVariables.LogWithTag("Location changed by location request");
+              //  GlobalVariables.LogWithTag("Location changed by location request");
                 UpdateLocation(location);
 
             }
@@ -371,7 +373,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
             @Override
             public void onLocationChanged(Location location) {
 
-                GlobalVariables.LogWithTag("Location changed in NET by location manager");
+             //   GlobalVariables.LogWithTag("Location changed in NET by location manager");
                 UpdateLocation(location);
 
             }
@@ -401,7 +403,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
             @Override
             public void onLocationChanged(Location location) {
 
-                GlobalVariables.LogWithTag("Location changed in GPS by location manager");
+           //     GlobalVariables.LogWithTag("Location changed in GPS by location manager");
                 UpdateLocation(location);
             }
 
@@ -412,13 +414,13 @@ public class MapReadyCallback implements OnMapReadyCallback {
 
             @Override
             public void onProviderEnabled(String provider) {
-                GlobalVariables.LogWithTag("Provider enabled again");
+           //     GlobalVariables.LogWithTag("Provider enabled again");
                 RemoveLocationNotification();
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                GlobalVariables.LogWithTag("Provider disabled");
+            //    GlobalVariables.LogWithTag("Provider disabled");
 
                 NotifyOfProviderDisabled();
 

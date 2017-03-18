@@ -70,7 +70,7 @@ public static IPDatabase getInstance()
 
     public boolean ReplacePointBoolean(String id,boolean value)
     {
-       db = getWritableDatabase();
+        db = getWritableDatabase();
 
         ContentValues cv = new ContentValues();
         GlobalVariables.LogWithTag("Value passed is " + value);
@@ -79,8 +79,33 @@ public static IPDatabase getInstance()
         cv.put(COLUMN_NOTIFY, String.valueOf(value));
 
 
-       return  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
-      //  db.replace(TABLE_NAME,null,cv);
+        return  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
+        //  db.replace(TABLE_NAME,null,cv);
+        //db.close();
+
+      /*  InterestPoint p = getPointById(id);
+
+        if(p!=null)
+        {
+            GlobalVariables.LogWithTag(p.title + " boolean in database is " + p.notifyWhenClose);
+        }*/
+
+
+    }
+
+    public boolean ReplacePointDescription(String id,String value)
+    {
+        db = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+     //   GlobalVariables.LogWithTag("Value passed is " + value);
+
+
+        cv.put(COLUMN_DESCRIPTION, String.valueOf(value));
+
+
+        return  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
+        //  db.replace(TABLE_NAME,null,cv);
         //db.close();
 
       /*  InterestPoint p = getPointById(id);

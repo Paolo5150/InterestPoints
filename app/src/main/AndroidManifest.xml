@@ -35,11 +35,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <receiver android:name=".MyReceiverTest">
-            <intent-filter>
-        <action android:name="diocane"></action>
+        <receiver android:name=".NotificationDismissReceiver">
 
-            </intent-filter>
 
         </receiver>
 

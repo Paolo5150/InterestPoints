@@ -13,8 +13,22 @@
 
         android:theme="@style/AppTheme.AppBarOverlay">
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            app:contentInsetEnd="8dp"
+            app:contentInsetStart="8dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
 
+
+
+        </android.support.v7.widget.Toolbar>
+<!--
         <fragment
             android:id="@+id/place_autocomplete_fragment"
             android:layout_width="match_parent"
@@ -23,7 +37,7 @@
 
             android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
             />
-
+-->
 
 
     </android.support.design.widget.AppBarLayout>

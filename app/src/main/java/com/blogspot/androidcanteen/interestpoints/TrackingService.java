@@ -18,6 +18,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.RemoteInput;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -56,7 +57,7 @@ public class TrackingService extends Service {
     @Override
     public int onStartCommand(Intent intent2, int flags, int startId) {
 
-        GlobalVariables.ToastShort("Tracking started");
+     //   GlobalVariables.ToastShort("Tracking started");
         isTracking = true;
 
         locationManager = (LocationManager) MainActivity.appCont.getSystemService(Context.LOCATION_SERVICE);
@@ -111,7 +112,7 @@ public class TrackingService extends Service {
         for(InterestPoint p : points)
         {
             float distance = GlobalVariables.distFrom(p.getLatLng(),new LatLng(location.getLatitude(),location.getLongitude()));
-            GlobalVariables.LogWithTag("Distance from " + p.title + ": " + distance);
+       //     GlobalVariables.LogWithTag("Distance from " + p.title + ": " + distance);
 
             if(distance < MyOptions.meterRange && p.notifyWhenClose)
             {
@@ -133,11 +134,22 @@ public class TrackingService extends Service {
 
         PendingIntent pDir =PendingIntent.getActivity(getApplicationContext(),p.id.hashCode(),direction,0);*/
 
+        int NotificationID = p.id.hashCode();
+
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
                 Uri.parse("http://maps.google.com/maps?&daddr="+p.lat+","+p.lng));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addCategory(Intent.CATEGORY_LAUNCHER );
         intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+
+
+        Intent buttonIntent = new Intent(getApplicationContext(), NotificationDismissReceiver.class);
+        buttonIntent.putExtra("notificationId",NotificationID);
+
+//Create the PendingIntent
+        PendingIntent btPendingIntent = PendingIntent.getBroadcast(getBaseContext(),NotificationID,buttonIntent,0);
+
+
 
         PendingIntent pDir =PendingIntent.getActivity(getApplicationContext(),p.id.hashCode(),intent,0);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
@@ -146,7 +158,9 @@ public class TrackingService extends Service {
                 .setContentText("Click to get directions")
                 .setContentIntent(pDir)
                 .setSmallIcon(R.drawable.noticon)
+                .addAction(0,"Dismiss",btPendingIntent)
                 .setSound(notificationsound)
+                .setAutoCancel(false)
                 .setVibrate(new long[]{0,150,100,150,100,500})
                 .setOnlyAlertOnce(true)
                 .build();
@@ -154,8 +168,8 @@ public class TrackingService extends Service {
 
 
 
-        not.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_AUTO_CANCEL;
-        notManager.notify(p.id.hashCode(),not);
+        not.flags = Notification.FLAG_NO_CLEAR ;
+        notManager.notify(NotificationID,not);
 
         //Stop notification
         points.remove(p);
@@ -214,7 +228,7 @@ public class TrackingService extends Service {
             @Override
             public void onLocationChanged(Location location) {
 
-                GlobalVariables.LogWithTag("Location changed in NET in SERVICE");
+              //  GlobalVariables.LogWithTag("Location changed in NET in SERVICE");
                 CalculateDistance(location);
 
             }
@@ -243,7 +257,7 @@ public class TrackingService extends Service {
             @Override
             public void onLocationChanged(Location location) {
 
-                GlobalVariables.LogWithTag("Location changed in GPS by in SERVICE");
+           //     GlobalVariables.LogWithTag("Location changed in GPS by in SERVICE");
                 CalculateDistance(location);
             }
 
@@ -254,13 +268,13 @@ public class TrackingService extends Service {
 
             @Override
             public void onProviderEnabled(String provider) {
-                GlobalVariables.LogWithTag("Provider enabled again in service");
+            //    GlobalVariables.LogWithTag("Provider enabled again in service");
                 RemoveLocationNotification();
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                GlobalVariables.LogWithTag("Provider disabled");
+          //      GlobalVariables.LogWithTag("Provider disabled");
 
                 NotifyOfProviderDisabled();
 
@@ -304,8 +318,8 @@ public class TrackingService extends Service {
     @Override
     public void onDestroy() {
 
-        GlobalVariables.LogWithTag("Service stop");
-        GlobalVariables.ToastShort("Tracking stopped");
+    //    GlobalVariables.LogWithTag("Service stop");
+   //     GlobalVariables.ToastShort("Tracking stopped");
         stopLocationRequest();
         isTracking = false;
         notManager.cancel(TRACKING_NOTIFICATION_ID);
