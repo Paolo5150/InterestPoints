@@ -2,6 +2,7 @@ package com.blogspot.androidcanteen.interestpoints;
 
 import android.animation.ValueAnimator;
 import android.graphics.drawable.BitmapDrawable;
+import android.icu.text.IDNA;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,10 +29,12 @@ public class PointListActivity extends AppCompatActivity {
     ImageView im2;
 
 
-
+    Infodialog di;
 
     int bitmapHeight;
     int bitmapWidth;
+
+    RecyclerAdapter adapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +46,10 @@ public class PointListActivity extends AppCompatActivity {
         recView.setLayoutManager(layoutManager);
         tb = (Toolbar) findViewById(R.id.toolbar);
 
+        di = new Infodialog(this);
 
+        if(IPDatabase.getInstance().GetAllPoints().size()!=0)
+        di.create(getString(R.string.infoDialogPlacesActivity),null,2000);
 
 
         tb.setTitle("Interest Points");
@@ -52,9 +58,10 @@ public class PointListActivity extends AppCompatActivity {
 
 
 
-        final RecyclerAdapter adapter = new RecyclerAdapter(PointListActivity.this);
-        recView.setAdapter(adapter);
 
+       adapter = new RecyclerAdapter(PointListActivity.this);
+
+        recView.setAdapter(adapter);
       ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
           @Override
           public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -85,6 +92,8 @@ public class PointListActivity extends AppCompatActivity {
         touchHelper.attachToRecyclerView(recView);
 
 
+
+        //Background stuff
         im = (ImageView) findViewById(R.id.backgroun_one);
         im2 = (ImageView) findViewById(R.id.background_two);
 
@@ -111,7 +120,11 @@ public class PointListActivity extends AppCompatActivity {
 
         //scrollImages.start();
 
+
+        //Backgroun animation
         TranslateAnimation anim = new TranslateAnimation(0,-bitmapWidth,0,0);
+
+
 
         anim.setInterpolator(new LinearInterpolator());
         anim.setDuration(200000);
@@ -122,13 +135,13 @@ public class PointListActivity extends AppCompatActivity {
         im2.startAnimation(anim);
 
 
-
     }
 
 
     protected void onPause()
     {
         super.onPause();
+        di.StopShowDelay();
         GlobalVariables.LogWithTag("Point list act paused");
 
 

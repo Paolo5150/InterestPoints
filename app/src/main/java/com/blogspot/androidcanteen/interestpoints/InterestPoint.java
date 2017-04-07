@@ -14,16 +14,18 @@ public class InterestPoint {
     public String description;
     public String lat;
     public String lng;
+    public String address;
     public boolean notifyWhenClose;
     public String id;
 
 
 
-    public InterestPoint(String id,String title,String description, String lat, String lng, boolean notifyWhenClose) {
+    public InterestPoint(String id,String title,String address,String description, String lat, String lng, boolean notifyWhenClose) {
         this.id = id;
 
         this.description = description;
         this.lat = lat;
+        this.address = address;
         this.lng = lng;
         this.notifyWhenClose = notifyWhenClose;
         this.title = title;

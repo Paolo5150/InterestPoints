@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:padding="10dp"
+    >
+
+
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1">
+
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+            app:srcCompat="@drawable/details_address"
+
+                android:layout_weight="0.5" />
+
+        <TextView
+            android:text="Address"
+            android:layout_width="match_parent"
+            android:padding="2dp"
+            android:layout_height="match_parent"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+            android:textStyle="italic"
+            android:id="@+id/address"
+            android:layout_weight="0.5"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/details_phone"
+
+            android:layout_weight="0.5" />
+
+        <TextView
+            android:text="Phone"
+            android:layout_width="match_parent"
+            android:padding="2dp"
+            android:layout_height="match_parent"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+            android:textStyle="italic"
+            android:id="@+id/phoneNumber"
+            android:layout_weight="0.5"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/details_website"
+
+            android:layout_weight="0.5" />
+
+        <TextView
+            android:text="Website"
+            android:layout_width="match_parent"
+            android:padding="2dp"
+            android:layout_height="match_parent"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+            android:textStyle="italic"
+            android:id="@+id/website"
+            android:layout_weight="0.5"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

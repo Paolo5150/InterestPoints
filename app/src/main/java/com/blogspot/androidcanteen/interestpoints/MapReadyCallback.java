@@ -2,10 +2,12 @@ package com.blogspot.androidcanteen.interestpoints;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -13,17 +15,20 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.MainThread;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
+import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.internal.zzi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -49,7 +54,7 @@ import java.util.List;
  * Created by Paolo on 13/02/2017.
  */
 
-public class MapReadyCallback implements OnMapReadyCallback {
+public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
 
     public static boolean useLocationManager = false; //eDIT IN CONSTRUCTOR
 
@@ -57,6 +62,8 @@ public class MapReadyCallback implements OnMapReadyCallback {
     public static int PLACE_PICKER_REQUEST = 1;
 
     public boolean requestingUpdates = false;
+
+
 
     public GoogleMap map;
     float mapPadding;
@@ -80,13 +87,17 @@ public class MapReadyCallback implements OnMapReadyCallback {
     Circle range;
 
 
-    public MapReadyCallback(final Activity act, SupportMapFragment mapFrag, GoogleApiClient googleApiClient) {
+    public MapReadyCallback(final Activity act, SupportMapFragment mapFrag, GoogleApiClient googleApiClient)  {
+
+
         this.mapFrag = mapFrag;
         this.act = act;
         this.googleApiClient = googleApiClient;
 
         useLocationManager = false;
 
+
+        IPDatabase.getInstance().AddListener(this);
         locationRequest = LocationRequest.create();
 
         locationRequest.setInterval(5);
@@ -143,6 +154,15 @@ public class MapReadyCallback implements OnMapReadyCallback {
 
     private void UpdateLocation(Location location) {
 
+
+
+
+        if(currentLocation==null)
+        {
+           MoveGentlyToPosition(new LatLng(location.getLatitude(),location.getLongitude()),18);
+
+        }
+
         currentLocation = location;
 
 
@@ -184,6 +204,8 @@ public class MapReadyCallback implements OnMapReadyCallback {
         map.getUiSettings().setCompassEnabled(true);
         map.setPadding(0, (int) mapPadding, 0, 0);
 
+
+
         UpdateMarkers();
 
         map.setOnInfoWindowLongClickListener(new GoogleMap.OnInfoWindowLongClickListener() {
@@ -214,6 +236,8 @@ public class MapReadyCallback implements OnMapReadyCallback {
         });
 
 
+
+
         View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
 
        locationButton.setVisibility(View.VISIBLE);
@@ -239,26 +263,6 @@ public class MapReadyCallback implements OnMapReadyCallback {
             }
         });
 
-      /*  locationButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-
-             //   GlobalVariables.LogWithTag("Long click " + googleApiClient.isConnected());
-
-
-                toTracking = new Intent(act, TrackingService.class);
-
-
-                if(!TrackingService.isTracking)
-                act.startService(toTracking);
-                else
-                act.stopService(toTracking);
-
-
-                act.finish();
-                return true;
-            }
-        });*/
 
 
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -281,6 +285,8 @@ public class MapReadyCallback implements OnMapReadyCallback {
 
     }
 
+
+
     public void startLocationRequest() {
 
     requestingUpdates = true;
@@ -296,22 +302,25 @@ public class MapReadyCallback implements OnMapReadyCallback {
             return;
         }
         if (useLocationManager) {
-            GlobalVariables.LogWithTag("Update requested to LOCATION MANAGER");
+        //    GlobalVariables.LogWithTag("Update requested to LOCATION MANAGER");
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, gpsListener);
            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, netListener);
 
 
         } else {
-            GlobalVariables.LogWithTag("Update requested to FUSEDLOCATIONAPI");
+         //   GlobalVariables.LogWithTag("Update requested to FUSEDLOCATIONAPI");
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     googleApiClient, locationRequest, locationListener);
         }
+
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+            GlobalVariables.ToastShort("Plase turn your location on");
     }
 
     public void stopLocationRequest() {
 
-        GlobalVariables.LogWithTag("Local manager in activity update stopped");
-        currentLocation = null;
+     //   GlobalVariables.LogWithTag("Local manager in activity update stopped");
+       // currentLocation = null;
         requestingUpdates = false;
 
         if (useLocationManager) {
@@ -361,7 +370,7 @@ public class MapReadyCallback implements OnMapReadyCallback {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-              //  GlobalVariables.LogWithTag("Location changed by location request");
+       //         GlobalVariables.LogWithTag("Location changed by location request");
                 UpdateLocation(location);
 
             }
@@ -428,5 +437,10 @@ public class MapReadyCallback implements OnMapReadyCallback {
 
             }
         };
+    }
+
+    @Override
+    public void OnDatabaseChange() {
+        UpdateMarkers();
     }
 }

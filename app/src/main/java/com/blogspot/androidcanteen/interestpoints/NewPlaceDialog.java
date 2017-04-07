@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -20,21 +22,23 @@ public class NewPlaceDialog {
     Activity act;
     IDialogListener listener;
 
+
     public EditText desc;
 
-    public NewPlaceDialog(Activity act, final IDialogListener listener)
+    public NewPlaceDialog(Activity act, String placeSelectedTitle, final IDialogListener listener,long delay)
     {
 
         this.act = act;
         this.listener = listener;
 
+
         LayoutInflater inflater = (LayoutInflater)act.getLayoutInflater();
         View view = inflater.inflate(R.layout.new_place_dialog, null);
 
-        AlertDialog alertDialog = new AlertDialog.Builder(act)
+        final AlertDialog alertDialog = new AlertDialog.Builder(act)
                 .create();
 
-        alertDialog.setTitle("Your description");
+        alertDialog.setTitle(placeSelectedTitle);
 
         alertDialog.setView(view);
 
@@ -57,8 +61,18 @@ public class NewPlaceDialog {
             }
         });
 
-
+        if(delay==0)
         alertDialog.show();
+        else
+        {
+            Handler hand = new Handler(Looper.getMainLooper());
+            hand.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertDialog.show();
+                }
+            }, delay);
+        }
 
 
 

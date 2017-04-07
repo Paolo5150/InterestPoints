@@ -24,12 +24,15 @@ public class IPDatabase extends SQLiteOpenHelper {
     public String COLUMN_ID = "id";
     public String COLUMN_LINK = "link";
     public String COLUMN_TITLE = "title";
+    public String COLUMN_ADDRESS = "address";
     public String COLUMN_DESCRIPTION = "description";
     public String COLUMN_LATITUDE = "latitude";
     public String COLUMN_LONGITUDE = "longitude";
     public String COLUMN_NOTIFY = "notify";
 
     SQLiteDatabase db;
+
+    public ArrayList<IDatabaseListener> listeners;
 
 public static IPDatabase getInstance()
 {
@@ -42,6 +45,7 @@ public static IPDatabase getInstance()
     public IPDatabase(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
 
+        listeners = new ArrayList<>();
         db = getReadableDatabase();
     }
 
@@ -54,6 +58,7 @@ public static IPDatabase getInstance()
         String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "("
                 + COLUMN_ID + " TEXT PRIMARY KEY," // cursror 0
                 + COLUMN_TITLE + " TEXT,"                           // cursror 1
+                + COLUMN_ADDRESS + " TEXT,"                           // cursror 1
                 + COLUMN_DESCRIPTION + " TEXT, "                          // cursror 2
                 + COLUMN_LATITUDE + " TEXT, "                          // cursror 2
                 + COLUMN_LONGITUDE + " TEXT, "                          // cursror 2
@@ -68,6 +73,13 @@ public static IPDatabase getInstance()
         GlobalVariables.LogWithTag("Upgrade called");
     }
 
+    private void NotifyAllListeners()
+    {
+
+        for(IDatabaseListener lis : listeners)
+            lis.OnDatabaseChange();
+    }
+
     public boolean ReplacePointBoolean(String id,boolean value)
     {
         db = getWritableDatabase();
@@ -79,7 +91,10 @@ public static IPDatabase getInstance()
         cv.put(COLUMN_NOTIFY, String.valueOf(value));
 
 
-        return  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
+
+       boolean ret =  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
+        NotifyAllListeners();
+        return ret;
         //  db.replace(TABLE_NAME,null,cv);
         //db.close();
 
@@ -89,6 +104,7 @@ public static IPDatabase getInstance()
         {
             GlobalVariables.LogWithTag(p.title + " boolean in database is " + p.notifyWhenClose);
         }*/
+
 
 
     }
@@ -103,8 +119,11 @@ public static IPDatabase getInstance()
 
         cv.put(COLUMN_DESCRIPTION, String.valueOf(value));
 
+        boolean ret =   db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
 
-        return  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
+        NotifyAllListeners();
+
+        return ret;
         //  db.replace(TABLE_NAME,null,cv);
         //db.close();
 
@@ -130,7 +149,7 @@ db = getReadableDatabase();
         if (cursor .moveToFirst()) {
             while (cursor.isAfterLast() == false) {
 
-                InterestPoint p = new InterestPoint(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),Boolean.parseBoolean(cursor.getString(5)));
+                InterestPoint p = new InterestPoint(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),Boolean.parseBoolean(cursor.getString(6)));
                 list.add(p);
 
 
@@ -170,6 +189,8 @@ db = getReadableDatabase();
         db.delete(TABLE_NAME,COLUMN_ID + " = ?",new String[]{id});
         db.close();
 
+        NotifyAllListeners();
+
         GlobalVariables.ToastShort(p.title + " deleted");
 
     }
@@ -184,6 +205,13 @@ db = getReadableDatabase();
 
         GlobalVariables.ToastShort(p.title + " deleted");
 
+        NotifyAllListeners();
+
+    }
+
+    public void AddListener(IDatabaseListener listener)
+    {
+        listeners.add(listener);
     }
 
     public InterestPoint getPointByTitle(String title)
@@ -224,6 +252,7 @@ db = getReadableDatabase();
         cv.put(COLUMN_DESCRIPTION,ip.description);
         cv.put(COLUMN_LATITUDE,ip.lat);
         cv.put(COLUMN_LONGITUDE,ip.lng);
+        cv.put(COLUMN_ADDRESS,ip.address);
         cv.put(COLUMN_NOTIFY,String.valueOf(ip.notifyWhenClose));
 
         db = getWritableDatabase();
@@ -232,7 +261,9 @@ db = getReadableDatabase();
 
         GlobalVariables.ToastShort(ip.title + " saved");
 
-        printAllPoints();
+      //  printAllPoints();
+
+        NotifyAllListeners();
 
     }
 }

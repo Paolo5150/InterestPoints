@@ -1,7 +1,11 @@
 package com.blogspot.androidcanteen.interestpoints;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -10,6 +14,9 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DecimalFormat;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Handler;
 
 /**
  * Created by Paolo on 13/02/2017.
@@ -18,6 +25,8 @@ import java.text.DecimalFormat;
 public class GlobalVariables {
 
     public static final String TAG = "InterestPoints";
+
+
 
     public static void LogWithTag(String message)
     {
@@ -85,5 +94,84 @@ public class GlobalVariables {
         float dist = (float) (earthRadius * c);
 
         return dist;
+    }
+
+    public static void ShowAlertDialog(Activity act, String message) {
+
+        final AlertDialog dialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+
+        builder.setTitle("Info");
+        builder.setMessage(message);
+
+
+        dialog = builder.create();
+        dialog.setCancelable(false);
+
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+
+
+    }
+
+    public static void ShowAlertDialog(Activity act, String message, long delay) {
+
+        final AlertDialog dialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+
+        builder.setTitle("Info");
+        builder.setMessage(message);
+
+
+        dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+
+        android.os.Handler hand = new android.os.Handler(Looper.getMainLooper());
+        hand.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        },delay);
+
+
+
+    }
+
+    public static void ShowAlertDialog(Activity act, String message, final IDialogListener listener) {
+
+        final AlertDialog dialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+
+        builder.setTitle("Info");
+        builder.setMessage(message);
+
+
+        dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                listener.OnOKButtonPressed("");
+            }
+        });
+
+        dialog.show();
+
+
     }
 }

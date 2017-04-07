@@ -51,7 +51,7 @@
         android:layout_height="match_parent"
         tools:context="com.blogspot.androidcanteen.interestpoints.MainActivity" />
 
-    <android.support.design.widget.FloatingActionButton
+    <!--<android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,6 +59,52 @@
         android:layout_margin="@dimen/fab_margin"
 
         app:srcCompat="@drawable/officelist"
-        app:backgroundTint="@android:color/white" />
+        app:backgroundTint="@android:color/white" />-->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha="0"
+        android:clickable="true"
+        android:id="@+id/warningPanel">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/location_symbol"
+            android:id="@+id/warningPanel_icon"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="false"
+            android:layout_centerInParent="true" />
+
+        <TextView
+            android:text="Location service is disabled."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/warningPanel_message"
+            android:layout_below="@+id/warningPanel_icon"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:textColor="#FFFFFF"
+            android:textAlignment="center"
+            android:layout_marginTop="20dp"
+            android:alpha="1"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:background="#FFFFFF"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+        >
+
+
+        <include layout="@layout/point_list_bottomsheet"/>
+
+    </android.support.v4.widget.NestedScrollView>
+
 
 </android.support.design.widget.CoordinatorLayout>

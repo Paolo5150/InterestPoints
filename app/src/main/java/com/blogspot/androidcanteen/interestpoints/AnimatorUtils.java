@@ -16,7 +16,9 @@ public class AnimatorUtils {
 
     public static void animateViewHolder(RecyclerView.ViewHolder holder,int position)
     {
+        GlobalVariables.LogWithTag("View animated");
         holder.itemView.setAlpha(0);
+
         ObjectAnimator animator = ObjectAnimator.ofFloat(holder.itemView,"alpha",0,1);
         animator.setDuration(1500);
         animator.setStartDelay(position*150);

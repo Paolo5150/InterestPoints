@@ -5,9 +5,17 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.GnssStatus;
+import android.location.GpsStatus;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -19,6 +27,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -39,11 +48,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
+import java.util.logging.Handler;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1111;
     final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1268;
+
 
     public static Context appCont;
 
@@ -53,11 +64,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     MapReadyCallback mapCall;
     PlaceAutocompleteFragment autocompleteFragment;
     Toolbar toolbar;
+    FloatingActionButton fab;
+    WarningPanel panel;
+
+    Infodialog delayedMessage;
+
+    View bottomSheetView;
+    SavedPlacesBottomSheet bottomSheet;
+     RelativeLayout warning;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        toolbar   = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
@@ -74,59 +94,61 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFrag);
-        mapCall = new MapReadyCallback(MainActivity.this,mapFrag,mGoogleApiClient);
+        mapCall = new MapReadyCallback(MainActivity.this, mapFrag, mGoogleApiClient);
 
-    /*    autocompleteFragment = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+       warning = (RelativeLayout) findViewById(R.id.warningPanel);
 
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
+        panel = new WarningPanel(warning);
 
-                SavePlace(place);
+        bottomSheetView = findViewById(R.id.bottom_sheet);
+        bottomSheet = new SavedPlacesBottomSheet(this,bottomSheetView);
 
-            }
+        if(IPDatabase.getInstance().GetAllPoints().size()==0)
+        bottomSheet.Hide();
+       else
+            bottomSheet.Show();
 
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
+        delayedMessage = new Infodialog(this);
 
-            }
-        });*/
-
-
-        CheckPermission();
-
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+      /*  fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Intent toList = new Intent(MainActivity.this, PointListActivity.class);
-                startActivityForResult(toList,1000);
+                if (IPDatabase.getInstance().GetAllPoints().size() != 0) {
+                    Intent toList = new Intent(MainActivity.this, PointListActivity.class);
+                    startActivityForResult(toList, 1000);
+                } else
+                    GlobalVariables.ToastShort("No places saved!");
 
             }
-        });
+        });*/
+
+        CheckPermission();
     }
 
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
-        stopService(new Intent(MainActivity.this,TrackingService.class));
+        stopService(new Intent(MainActivity.this, TrackingService.class));
 
-        if(mapCall!=null && mapCall.map!=null)
+        CheckcurrentGPSstatus((LocationManager) getSystemService(LOCATION_SERVICE));
+
+        if (mapCall != null && mapCall.map != null)
             mapCall.UpdateMarkers();
     }
 
 
-
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void Initialize() {
 
-GlobalVariables.LogWithTag("Initialization");
+        GlobalVariables.LogWithTag("Initialization");
 
-      SetUpToolbar();
+        CheckForLocationService();
+
+        SetUpToolbar();
+
+
+
 
 
 
@@ -135,13 +157,87 @@ GlobalVariables.LogWithTag("Initialization");
         mapFrag.getMapAsync(mapCall);
 
 
-
-        if(MapReadyCallback.useLocationManager)
+        if (MapReadyCallback.useLocationManager)
             mapCall.startLocationRequest();
+
+        delayedMessage.create(getString(R.string.infoDialogSavePlace), null, 5000);
 
 
     }
 
+
+    private void CheckForLocationService() {
+
+
+        final LocationManager man = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        //Set up listener
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            man.registerGnssStatusCallback(new GnssStatus.Callback() {
+                @Override
+                public void onStarted() {
+                    super.onStarted();
+                    CheckcurrentGPSstatus(man);
+
+                }
+            });
+
+
+            man.registerGnssStatusCallback(new GnssStatus.Callback() {
+                @Override
+                public void onStopped() {
+                    CheckcurrentGPSstatus(man);
+                }
+            });
+        }
+        else
+        {
+            man.addGpsStatusListener(new GpsStatus.Listener() {
+                @Override
+                public void onGpsStatusChanged(int event) {
+
+                    CheckcurrentGPSstatus(man);
+
+                }
+            });
+        }
+
+
+
+    }
+
+
+    void CheckcurrentGPSstatus(LocationManager man)
+    {
+
+        if(!man.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+          //  fab.setClickable(false);
+         //   fab.setVisibility(View.INVISIBLE);
+            toolbar.setClickable(false);
+            panel.setMessage("Location service is disabled.");
+            panel.Show();
+
+        }
+        else
+        {
+         //   fab.setClickable(true);
+        //    fab.setVisibility(View.VISIBLE);
+            toolbar.setClickable(true);
+            panel.Hide();
+        }
+    }
     private void SetUpToolbar() {
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -161,16 +257,45 @@ GlobalVariables.LogWithTag("Initialization");
             @Override
             public void onClick(View v) {
 
-                Intent toTracking = new Intent(MainActivity.this, TrackingService.class);
 
 
-                if(!TrackingService.isTracking)
-                    startService(toTracking);
+                final Intent toTracking = new Intent(MainActivity.this, TrackingService.class);
+
+                Infodialog dialog = new Infodialog(MainActivity.this);
+
+                if(dialog.create(getString(R.string.infoDialogTracking), new IDialogListener() {
+                    @Override
+                    public void OnOKButtonPressed(String description) {
+
+                        if (!TrackingService.isTracking)
+                            startService(toTracking);
+                        else
+                            stopService(toTracking);
+
+                        finish();
+
+                    }
+                }))
+                {
+
+                }
                 else
-                    stopService(toTracking);
+                {
+                    if (!TrackingService.isTracking)
+                        startService(toTracking);
+                    else
+                        stopService(toTracking);
+
+                    finish();
+                }
 
 
-                finish();
+
+
+
+
+
+
             }
         });
 
@@ -238,13 +363,13 @@ GlobalVariables.LogWithTag("Initialization");
     private void SavePlace(final Place place)
     {
 
-        NewPlaceDialog d = new NewPlaceDialog(MainActivity.this, new IDialogListener() {
+        NewPlaceDialog d = new NewPlaceDialog(MainActivity.this, place.getName().toString(),new IDialogListener() {
             @Override
             public void OnOKButtonPressed(String description) {
 
                 GlobalVariables.LogWithTag("Description returned: " + description);
 
-                InterestPoint point = new InterestPoint(place.getId(),place.getName().toString(),description,String.valueOf(place.getLatLng().latitude),String.valueOf(place.getLatLng().longitude),true);
+                InterestPoint point = new InterestPoint(place.getId(),place.getName().toString(),place.getAddress().toString(),description,String.valueOf(place.getLatLng().latitude),String.valueOf(place.getLatLng().longitude),true);
 
                 List<InterestPoint> allPoints = IPDatabase.getInstance().GetAllPoints();
 
@@ -266,7 +391,7 @@ GlobalVariables.LogWithTag("Initialization");
                 mapCall.MoveGentlyToPosition(place.getLatLng(),18);
 
             }
-        });
+        },0);
         
 
     }
@@ -300,11 +425,19 @@ GlobalVariables.LogWithTag("Initialization");
     @Override
     protected void onStop() {
 
+        delayedMessage.StopShowDelay();
         mapCall.stopLocationRequest();
         if( mGoogleApiClient != null && mGoogleApiClient.isConnected() ) {
             mGoogleApiClient.disconnect();
         }
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+       mapCall.currentLocation = null;
+        super.onDestroy();
     }
 
     protected void onStart() {

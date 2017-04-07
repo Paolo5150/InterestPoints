@@ -18,6 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:id="@+id/toolbar"
+
     >
 
 
@@ -48,11 +49,16 @@
     </FrameLayout>
 
     <android.support.v7.widget.RecyclerView
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+
         android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+   android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="5dp"
+
         android:layout_height="match_parent"
         android:scrollbars="vertical" />
+
 
 
 </android.support.design.widget.CoordinatorLayout>
