@@ -55,6 +55,9 @@ public class RequestPlaceDetailsAsyncTask extends AsyncTask<String,Void,String> 
         RatingBar bars = (RatingBar) detailsActivity.findViewById(R.id.ratingStars);
         bars.setIsIndicator(true);
         bars.setRating(jsonResult.getRatingsFloat());
+
+       detailsActivity.openingHoursTextView.setText(jsonResult.openingHours);
+        detailsActivity.openingHoursDaysTextView.setText(jsonResult.days);
         super.onPostExecute(result);
     }
 

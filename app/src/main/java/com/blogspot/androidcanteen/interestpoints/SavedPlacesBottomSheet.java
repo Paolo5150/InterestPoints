@@ -16,6 +16,8 @@ import android.view.View;
 
 public class SavedPlacesBottomSheet implements IDatabaseListener {
 
+    final int PEEK_HEIGHT = 150;
+
     MainActivity act;
 
     NestedScrollView bottomSheet;
@@ -40,7 +42,7 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
 
         bsb = BottomSheetBehavior.from(bottomSheet);
 
-        bsb.setPeekHeight(120);
+        bsb.setPeekHeight(PEEK_HEIGHT);
         bsb.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
         SetBottomSheetHeightAccordingToContent();
@@ -85,6 +87,7 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
 
         recView = (RecyclerView) bottomSheet.findViewById(R.id.recyclerView);
         recView.setFocusable(false); //Very important to display the bottom sheet on the top!
+        recView.setNestedScrollingEnabled(false);
 
 
         layoutManager = new LinearLayoutManager(act);
@@ -152,25 +155,36 @@ private void SetBottomSheetHeightAccordingToContent()
     if(IPDatabase.getInstance().GetAllPoints().size()==0)
         bsb.setPeekHeight(0);
     else
-        bsb.setPeekHeight(120);
+        bsb.setPeekHeight(PEEK_HEIGHT);
 }
-  /*  public void Show()
+    public void Show()
     {
 
 
 
-        recView.scrollTo(0,0);
         bottomSheet.fullScroll(NestedScrollView.FOCUS_UP);
+
         bsb.setState(BottomSheetBehavior.STATE_EXPANDED);
 
 
-    }*/
+    }
 
     public int GetState()
     {
         return bsb.getState();
     }
 
+    public void Disable()
+    {
+
+        bottomSheet.setVisibility(View.GONE);
+    }
+
+    public void Enable()
+    {
+
+        bottomSheet.setVisibility(View.VISIBLE);
+    }
     @Override
     public void OnDatabaseChange(DATABASE_OPERATION operation) {
 

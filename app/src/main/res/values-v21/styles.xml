@@ -15,5 +15,11 @@
 
     </style>
 
+    <style name="PlaceDetailsLayouts">
+        <item name="android:padding">10dp</item>
+
+
+    </style>
+
 
 </resources>

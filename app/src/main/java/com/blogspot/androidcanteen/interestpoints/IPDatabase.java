@@ -114,6 +114,19 @@ public static IPDatabase getInstance()
 
     }
 
+    public int GetIndexOfItem(String title)
+    {
+        List<InterestPoint> points = GetAllPoints();
+
+        for(int i=0; i<points.size();i++)
+        {
+            if(points.get(i).title.equalsIgnoreCase(title))
+                return i;
+        }
+
+        return -1;
+    }
+
     public boolean ReplacePointDescription(String id,String value)
     {
         db = getWritableDatabase();

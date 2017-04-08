@@ -161,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(man.isProviderEnabled(LocationManager.GPS_PROVIDER))
         delayedMessage.create(getString(R.string.infoDialogSavePlace), null, 5000);
 
+        if(!GlobalVariables.isNetworkAvailable())
+            GlobalVariables.ToastShort("No internet connection detected, some features may ba unavailable");
+
     }
 
 
@@ -227,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
           //  fab.setClickable(false);
          //   fab.setVisibility(View.INVISIBLE);
             toolbar.setClickable(false);
+            bottomSheet.Disable();
             panel.setMessage("Location service is disabled.");
             panel.Show();
 
@@ -236,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
          //   fab.setClickable(true);
         //    fab.setVisibility(View.VISIBLE);
             toolbar.setClickable(true);
+            bottomSheet.Enable();
             panel.Hide();
         }
     }
@@ -289,13 +294,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                     finish();
                 }
-
-
-
-
-
-
-
 
             }
         });

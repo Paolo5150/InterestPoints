@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    style="@style/PlaceDetailsLayouts"
+
+
+    >
+
     <RatingBar
         android:id="@+id/ratingStars"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
         android:numStars="5"
         android:stepSize="0.1"
-        android:isIndicator="true" />
+        android:isIndicator="true"
+        android:gravity="center"
+        android:layout_height="match_parent" />
 
     <TextView
         android:text="TextView"
         android:layout_width="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:layout_height="match_parent"
         android:id="@+id/ratingNumber"
         android:layout_weight="1"
-        android:gravity="center"
-        android:textStyle="normal|bold|italic" />
+        android:gravity="top|center"
+        android:textStyle="normal|bold|italic"
+        android:layout_height="match_parent" />
 
 </LinearLayout>

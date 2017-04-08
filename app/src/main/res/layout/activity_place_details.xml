@@ -107,6 +107,7 @@
 
              <include layout="@layout/details_content_carddetails"/>
              <include layout="@layout/details_content_ratings"/>
+             <include layout="@layout/details_content_openinghours"/>
 
          </LinearLayout>
 

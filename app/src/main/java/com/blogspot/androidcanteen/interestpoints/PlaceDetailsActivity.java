@@ -31,6 +31,8 @@ public class PlaceDetailsActivity extends AppCompatActivity{
     public TextView addressTextView;
     public TextView phoneTextView;
     public TextView websiteTextView;
+    public TextView openingHoursTextView;
+    public TextView openingHoursDaysTextView;
     public LinearLayout mainContent;
 
     public NestedScrollView scroll;
@@ -77,9 +79,10 @@ public class PlaceDetailsActivity extends AppCompatActivity{
         addressTextView = (TextView)findViewById(R.id.address);
         phoneTextView = (TextView)findViewById(R.id.phoneNumber);
         websiteTextView = (TextView)findViewById(R.id.website);
+        openingHoursTextView = (TextView) findViewById(R.id.openingHoursTextView);
+        openingHoursDaysTextView = (TextView) findViewById(R.id.openingHoursDaysTextView);
         mainContent = (LinearLayout) findViewById(R.id.main_content_layout);
         scroll = (NestedScrollView) findViewById(R.id.my_nested_scroll);
-
 
 
         titleTextView.setMaxLines(1);
@@ -88,11 +91,14 @@ public class PlaceDetailsActivity extends AppCompatActivity{
 
         String link = RequestUtils.getLinkForPlaceDetails(point.id);
 
+        if(GlobalVariables.isNetworkAvailable())
+        {
         RequestPlaceDetailsAsyncTask task = new RequestPlaceDetailsAsyncTask(this);
-
-
-
-        task.execute(link);
+        task.execute(link);}
+        else {
+            GlobalVariables.ToastShort("Internet connection required");
+            finish();
+        }
 
 
 

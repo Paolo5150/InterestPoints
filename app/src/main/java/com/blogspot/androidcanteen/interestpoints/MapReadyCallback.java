@@ -218,6 +218,22 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
             }
         });*/
 
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+
+                String title = marker.getTitle();
+
+               int index =  IPDatabase.getInstance().GetIndexOfItem(title);
+
+                GlobalVariables.LogWithTag("Index is " + index);
+
+                act.bottomSheet.Show();
+                act.bottomSheet.recView.scrollToPosition(index);
+
+            }
+        });
+
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng)

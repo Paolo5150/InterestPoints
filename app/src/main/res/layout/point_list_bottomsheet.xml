@@ -22,8 +22,9 @@
         android:text="Saved places"
 
         android:padding="16dp"
-        android:textSize="16sp"
-        android:gravity="top" />
+        android:textSize="18sp"
+        android:gravity="top"
+        android:textStyle="bold" />
 
 
     <View
