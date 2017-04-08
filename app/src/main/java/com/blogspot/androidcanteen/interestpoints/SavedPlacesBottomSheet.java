@@ -57,15 +57,9 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
 
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
 
-                  /*  CoordinatorLayout.LayoutParams param = (CoordinatorLayout.LayoutParams) bottomSheet.getLayoutParams();
 
-                        param.height = CoordinatorLayout.LayoutParams.WRAP_CONTENT;
-
-                    bottomSheet.setLayoutParams(param);*/
-
+                    recView.scrollToPosition(0);
                     SetBottomSheetHeightAccordingToContent();
-
-
                     di.StopShowDelay();
                 }
 

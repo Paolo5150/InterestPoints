@@ -6,11 +6,12 @@
 
     <TextView
         android:text="SEARCH"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/toolbarSearch"
         android:layout_weight="0.5"
-        android:textColor="?android:attr/textColorPrimaryInverse" />
+        android:textColor="@color/colorText" />
 
     <TextView
         android:text="TRACK"
@@ -19,5 +20,5 @@
         android:id="@+id/toolbarTrack"
         android:layout_weight="0.5"
         android:gravity="right"
-        android:textColor="?android:attr/textColorPrimaryInverse" />
+        android:textColor="@color/colorText" />
 </LinearLayout>

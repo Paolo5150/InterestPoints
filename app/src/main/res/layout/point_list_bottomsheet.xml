@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Saved places"
-
+        android:textColor="@color/colorText"
         android:padding="16dp"
         android:textSize="18sp"
         android:gravity="top"
