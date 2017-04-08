@@ -16,6 +16,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.MainThread;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -69,7 +70,7 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
     float mapPadding;
     SupportMapFragment mapFrag;
     View mapView;
-    Activity act;
+    MainActivity act;
     GoogleApiClient googleApiClient;
    public LocationRequest locationRequest;
     LocationListener locationListener;
@@ -87,7 +88,7 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
     Circle range;
 
 
-    public MapReadyCallback(final Activity act, SupportMapFragment mapFrag, GoogleApiClient googleApiClient)  {
+    public MapReadyCallback(final MainActivity act, SupportMapFragment mapFrag, GoogleApiClient googleApiClient)  {
 
 
         this.mapFrag = mapFrag;
@@ -208,20 +209,25 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
 
         UpdateMarkers();
 
-        map.setOnInfoWindowLongClickListener(new GoogleMap.OnInfoWindowLongClickListener() {
+      /*  map.setOnInfoWindowLongClickListener(new GoogleMap.OnInfoWindowLongClickListener() {
             @Override
             public void onInfoWindowLongClick(Marker marker) {
                 IPDatabase.getInstance().DeleteInterestPointByTitle(marker.getTitle());
                 UpdateMarkers();
 
             }
-        });
+        });*/
 
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng)
             {
                // stopLocationRequest();
+
+                if(act.bottomSheet.GetState() == BottomSheetBehavior.STATE_EXPANDED)
+                    act.bottomSheet.Hide();
+
+
             }
         });
 
@@ -440,7 +446,9 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
     }
 
     @Override
-    public void OnDatabaseChange() {
+    public void OnDatabaseChange(DATABASE_OPERATION operation) {
+
+     //   if(operation == DATABASE_OPERATION.EDIT)
         UpdateMarkers();
     }
 }

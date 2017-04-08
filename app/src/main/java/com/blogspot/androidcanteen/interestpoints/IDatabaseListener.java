@@ -6,5 +6,10 @@ package com.blogspot.androidcanteen.interestpoints;
 
 public interface IDatabaseListener {
 
-    void OnDatabaseChange();
+    enum DATABASE_OPERATION
+    {ADD,
+    DELETE,
+        EDIT}
+
+    void OnDatabaseChange(DATABASE_OPERATION operation);
 }

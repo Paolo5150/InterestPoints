@@ -70,8 +70,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     Infodialog delayedMessage;
 
     View bottomSheetView;
-    SavedPlacesBottomSheet bottomSheet;
+    public SavedPlacesBottomSheet bottomSheet;
      RelativeLayout warning;
+
+    LocationManager man;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,10 +105,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         bottomSheetView = findViewById(R.id.bottom_sheet);
         bottomSheet = new SavedPlacesBottomSheet(this,bottomSheetView);
 
-        if(IPDatabase.getInstance().GetAllPoints().size()==0)
+        man  = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+     //  if(IPDatabase.getInstance().GetAllPoints().size()==0)
         bottomSheet.Hide();
-       else
-            bottomSheet.Show();
+     //  else
+      //      bottomSheet.Show();
 
         delayedMessage = new Infodialog(this);
 
@@ -131,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onResume();
         stopService(new Intent(MainActivity.this, TrackingService.class));
 
-        CheckcurrentGPSstatus((LocationManager) getSystemService(LOCATION_SERVICE));
+        CheckcurrentGPSstatus();
 
         if (mapCall != null && mapCall.map != null)
             mapCall.UpdateMarkers();
@@ -147,29 +151,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         SetUpToolbar();
 
-
-
-
-
-
         mGoogleApiClient.registerConnectionCallbacks(this); //Will connect
 
         mapFrag.getMapAsync(mapCall);
 
-
         if (MapReadyCallback.useLocationManager)
             mapCall.startLocationRequest();
 
+        if(man.isProviderEnabled(LocationManager.GPS_PROVIDER))
         delayedMessage.create(getString(R.string.infoDialogSavePlace), null, 5000);
-
 
     }
 
 
     private void CheckForLocationService() {
 
-
-        final LocationManager man = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -184,30 +180,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         //Set up listener
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            man.registerGnssStatusCallback(new GnssStatus.Callback() {
+
+
+           man.registerGnssStatusCallback(new GnssStatus.Callback() {
                 @Override
                 public void onStarted() {
                     super.onStarted();
-                    CheckcurrentGPSstatus(man);
+                    CheckcurrentGPSstatus();
+
 
                 }
-            });
 
-
-            man.registerGnssStatusCallback(new GnssStatus.Callback() {
                 @Override
                 public void onStopped() {
-                    CheckcurrentGPSstatus(man);
+                    CheckcurrentGPSstatus();
+
                 }
             });
+
         }
         else
         {
+
             man.addGpsStatusListener(new GpsStatus.Listener() {
                 @Override
                 public void onGpsStatusChanged(int event) {
 
-                    CheckcurrentGPSstatus(man);
+                    CheckcurrentGPSstatus();
+
 
                 }
             });
@@ -218,8 +218,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
-    void CheckcurrentGPSstatus(LocationManager man)
+    void CheckcurrentGPSstatus()
     {
+        GlobalVariables.LogWithTag("Checking status");
 
         if(!man.isProviderEnabled(LocationManager.GPS_PROVIDER))
         {
@@ -437,6 +438,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onDestroy() {
 
        mapCall.currentLocation = null;
+        IPDatabase.getInstance().listeners.clear();
+
+
         super.onDestroy();
     }
 

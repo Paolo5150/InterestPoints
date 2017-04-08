@@ -3,6 +3,7 @@ package com.blogspot.androidcanteen.interestpoints;
 import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,7 +16,7 @@ import android.view.View;
 
 public class SavedPlacesBottomSheet implements IDatabaseListener {
 
-    Activity act;
+    MainActivity act;
 
     NestedScrollView bottomSheet;
     BottomSheetBehavior bsb;
@@ -27,9 +28,10 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
 
     Infodialog di;
 
+    int currentHeight = 0;
 
 
-    public SavedPlacesBottomSheet(final Activity act, View mainView)
+    public SavedPlacesBottomSheet(final MainActivity act, View mainView)
     {
         this.act = act;
         bottomSheet = (NestedScrollView) mainView;
@@ -41,17 +43,33 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         bsb.setPeekHeight(120);
         bsb.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
+        SetBottomSheetHeightAccordingToContent();
+
         bsb.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
 
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    bsb.setPeekHeight(120);
+
+                  /*  CoordinatorLayout.LayoutParams param = (CoordinatorLayout.LayoutParams) bottomSheet.getLayoutParams();
+
+                        param.height = CoordinatorLayout.LayoutParams.WRAP_CONTENT;
+
+                    bottomSheet.setLayoutParams(param);*/
+
+                    SetBottomSheetHeightAccordingToContent();
+
+
                     di.StopShowDelay();
                 }
 
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    di.create(act.getString(R.string.infoDialogPlacesActivity),null,500);
+                else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+
+                    di.create(act.getString(R.string.infoDialogPlacesActivity),null,1500);
+                }
+                else if(newState == BottomSheetBehavior.STATE_DRAGGING)
+                {
+                  //  LimitHeight();
                 }
 
             }
@@ -66,12 +84,17 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         IPDatabase.getInstance().AddListener(this);
 
         recView = (RecyclerView) bottomSheet.findViewById(R.id.recyclerView);
+        recView.setFocusable(false); //Very important to display the bottom sheet on the top!
+
+
         layoutManager = new LinearLayoutManager(act);
         recView.setLayoutManager(layoutManager);
 
         adapter = new RecyclerAdapter(act);
 
         recView.setAdapter(adapter);
+
+
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -100,31 +123,74 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         touchHelper = new ItemTouchHelper(callback);
 
         touchHelper.attachToRecyclerView(recView);
+
+
     }
 
     public void Hide()
     {
 
 
-        bottomSheet.fullScroll(View.FOCUS_UP);
+        bottomSheet.fullScroll(NestedScrollView.FOCUS_UP);
         bsb.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
-    public void Show()
+    private void LimitHeight()
+    {
+        CoordinatorLayout.LayoutParams param = (CoordinatorLayout.LayoutParams) bottomSheet.getLayoutParams();
+
+        if(bottomSheet.getHeight() > 400)
+            param.height = (int) GlobalVariables.DpToPx(400);
+
+
+
+
+        bottomSheet.setLayoutParams(param);
+    }
+private void SetBottomSheetHeightAccordingToContent()
+{
+    if(IPDatabase.getInstance().GetAllPoints().size()==0)
+        bsb.setPeekHeight(0);
+    else
+        bsb.setPeekHeight(120);
+}
+  /*  public void Show()
     {
 
-        bottomSheet.fullScroll(View.FOCUS_UP);
+
+
+        recView.scrollTo(0,0);
+        bottomSheet.fullScroll(NestedScrollView.FOCUS_UP);
         bsb.setState(BottomSheetBehavior.STATE_EXPANDED);
 
 
+    }*/
+
+    public int GetState()
+    {
+        return bsb.getState();
     }
 
     @Override
-    public void OnDatabaseChange() {
+    public void OnDatabaseChange(DATABASE_OPERATION operation) {
 
-        GlobalVariables.LogWithTag("Listener called");
-        adapter = new RecyclerAdapter(act);
+        SetBottomSheetHeightAccordingToContent();
 
-        recView.setAdapter(adapter);
+        if(operation == DATABASE_OPERATION.ADD ) {
+            Hide();
+            adapter = new RecyclerAdapter(act);
+            recView.setAdapter(adapter);
+            currentHeight = (int) GlobalVariables.convertPixelsToDp(bottomSheet.getHeight(),act);
+            GlobalVariables.LogWithTag("Current height in dp " + currentHeight);
+
+        }
+        else
+            adapter.notifyDataSetChanged();
+
+        if(IPDatabase.getInstance().GetAllPoints().size()==0)
+            Hide();
+
+
+
     }
 }

@@ -73,11 +73,16 @@ public static IPDatabase getInstance()
         GlobalVariables.LogWithTag("Upgrade called");
     }
 
-    private void NotifyAllListeners()
+    private void NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION operation)
     {
 
-        for(IDatabaseListener lis : listeners)
-            lis.OnDatabaseChange();
+        int iii = 0;
+        for(IDatabaseListener lis : listeners) {
+            iii++;
+            lis.OnDatabaseChange(operation);
+        }
+
+        GlobalVariables.LogWithTag("Num of listeners " + iii);
     }
 
     public boolean ReplacePointBoolean(String id,boolean value)
@@ -93,7 +98,7 @@ public static IPDatabase getInstance()
 
 
        boolean ret =  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
-        NotifyAllListeners();
+        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.EDIT);
         return ret;
         //  db.replace(TABLE_NAME,null,cv);
         //db.close();
@@ -121,7 +126,7 @@ public static IPDatabase getInstance()
 
         boolean ret =   db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
 
-        NotifyAllListeners();
+       // NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.EDIT);
 
         return ret;
         //  db.replace(TABLE_NAME,null,cv);
@@ -189,7 +194,7 @@ db = getReadableDatabase();
         db.delete(TABLE_NAME,COLUMN_ID + " = ?",new String[]{id});
         db.close();
 
-        NotifyAllListeners();
+        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.DELETE);
 
         GlobalVariables.ToastShort(p.title + " deleted");
 
@@ -205,7 +210,7 @@ db = getReadableDatabase();
 
         GlobalVariables.ToastShort(p.title + " deleted");
 
-        NotifyAllListeners();
+        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.DELETE);
 
     }
 
@@ -263,7 +268,7 @@ db = getReadableDatabase();
 
       //  printAllPoints();
 
-        NotifyAllListeners();
+        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.ADD);
 
     }
 }

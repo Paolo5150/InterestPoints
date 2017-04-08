@@ -38,9 +38,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     public final static int VIEW_ON_MAP_REQUEST = 150000;
 
     List<InterestPoint> allPoints;
-    Activity act;
+    MainActivity act;
 
-    public RecyclerAdapter(Activity act)
+    public RecyclerAdapter(MainActivity act)
     {
 
         this.act = act;
@@ -239,11 +239,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
                         //Item CheckOnMap
                         if(item.getItemId() == R.id.viewOnMap) {
 
-                            Intent pointReturned = new Intent();
-                            pointReturned.putExtra("place_title", point.title);
-                            act.setResult(VIEW_ON_MAP_REQUEST, pointReturned);
+                          //  Intent pointReturned = new Intent();
+                           // pointReturned.putExtra("place_title", point.title);
+                            act.bottomSheet.Hide();
 
-                            act.finish();
+                            // GlobalVariables.LogWithTag("Main activity got: " + data.getStringExtra("place_title"));
+                            InterestPoint point = IPDatabase.getInstance().getPointByTitle(allPoints.get(position).title);
+
+                            act.mapCall.MoveGentlyToPosition(point.getLatLng(),18);
+                          //  act.setResult(VIEW_ON_MAP_REQUEST, pointReturned);
+
+
                         }
 
 

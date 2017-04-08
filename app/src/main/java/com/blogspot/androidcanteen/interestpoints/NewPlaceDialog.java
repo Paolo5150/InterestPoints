@@ -41,6 +41,7 @@ public class NewPlaceDialog {
         alertDialog.setTitle(placeSelectedTitle);
 
         alertDialog.setView(view);
+        alertDialog.setCancelable(false);
 
         desc = (EditText) view.findViewById(R.id.descriptionEditText);
 
