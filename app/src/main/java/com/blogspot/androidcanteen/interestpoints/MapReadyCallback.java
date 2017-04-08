@@ -222,14 +222,7 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
             @Override
             public void onInfoWindowClick(Marker marker) {
 
-                String title = marker.getTitle();
-
-               int index =  IPDatabase.getInstance().GetIndexOfItem(title);
-
-                GlobalVariables.LogWithTag("Index is " + index);
-
-                act.bottomSheet.Show();
-                act.bottomSheet.recView.scrollToPosition(index);
+            act.bottomSheet.ShowSingleCard(marker.getTitle());
 
             }
         });

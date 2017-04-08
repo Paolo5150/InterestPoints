@@ -63,24 +63,21 @@
 
 
 
-    <android.support.v4.widget.NestedScrollView
+    <FrameLayout
         android:id="@+id/bottom_sheet"
-        android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:isScrollContainer="false"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+
 
         android:background="@drawable/rounded_rect"
-        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
-        android:layout_gravity="top">
+        android:layout_width="match_parent"
+        android:layout_height="550dp">
 
 
         <include layout="@layout/point_list_bottomsheet"
 
            />
 
-    </android.support.v4.widget.NestedScrollView>
+    </FrameLayout>
 
 
 
