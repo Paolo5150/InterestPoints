@@ -40,6 +40,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     List<InterestPoint> allPoints;
     MainActivity act;
 
+    public boolean binding = false;
+
     public RecyclerAdapter(MainActivity act)
     {
 
@@ -50,6 +52,18 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         GlobalVariables.LogWithTag("Adapter constructor called");
 
     }
+
+    public RecyclerAdapter(MainActivity act, List<InterestPoint> points)
+    {
+
+        this.act = act;
+
+        allPoints = points;
+
+        GlobalVariables.LogWithTag("Adapter constructor called with list");
+
+    }
+
 
 
 
@@ -204,7 +218,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
         MyViewholder holder = new MyViewholder(inflated);
 
-        AnimatorUtils.animateViewHolder(holder,0);
+       // AnimatorUtils.animateViewHolder(holder,0);
 
         return holder;
     }
@@ -212,8 +226,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     @Override
     public void onBindViewHolder(final MyViewholder holder, final int position) {
 
-       //
-        allPoints = IPDatabase.getInstance().GetAllPoints();
+       binding = true;
+
         final InterestPoint point = allPoints.get(position);
 
         holder.title.setText(point.title);
@@ -225,6 +239,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         holder.placeOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(binding)
+                    return;
 
                 PopupMenu options = new PopupMenu(act,holder.placeOptions);
 
@@ -262,9 +279,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
                                 @Override
                                 public void OnOKButtonPressed(String description) {
 
-                                    IPDatabase.getInstance().ReplacePointDescription(point.id,description);
-                                    allPoints = IPDatabase.getInstance().GetAllPoints();
-                                    notifyItemChanged(position);
+                                    IPDatabase.getInstance().ReplacePointDescription(point.id,description,position);
+
 
                                 }
                             },holder.rotationRudation);
@@ -276,7 +292,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
                         //Place details, will spawn new activity
                         else if(item.getItemId() == R.id.placeDetails)
                         {
-                            Intent toDetails = new Intent(act,PlaceDetailsActivity.class);
+                            Intent toDetails = new Intent(act,PlaceDetailsTabActivity.class);
                             toDetails.putExtra("Title",point.title);
                             act.startActivity(toDetails);
                         }
@@ -288,32 +304,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
             }
         });
 
-        //Works, need to se ehow to use it
-     /*   holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                InterestPoint point = allPoints.get(position);
-
-                String link = RequestUtils.getLinkForPlaceDetails(point.id);
-
-                RequestPlaceDetailsAsyncTask task = new RequestPlaceDetailsAsyncTask();
-                try {
-
-                    String result = task.execute(link).get();
-
-                    PlaceDetailsJsonObject jsonResult;
-                    jsonResult = new PlaceDetailsJsonObject(result);
-
-                    GlobalVariables.LogWithTag("Phone of " + point.title +": " + jsonResult.phone);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-        });*/
 
         holder.notifyBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -323,13 +314,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
               IPDatabase.getInstance().ReplacePointBoolean(p.id,isChecked);
 
-                IPDatabase.getInstance().printAllPoints();
+              //  IPDatabase.getInstance().printAllPoints();
 
 
             }
         });
 
-
+        binding = false;
 
     }
 

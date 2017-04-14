@@ -14,7 +14,7 @@
         android:stepSize="0.1"
         android:isIndicator="true"
         android:gravity="center"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:text="TextView"
@@ -22,8 +22,9 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:id="@+id/ratingNumber"
         android:layout_weight="1"
-        android:gravity="top|center"
+        android:gravity="center"
         android:textStyle="normal|bold|italic"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:textSize="36sp" />
 
 </LinearLayout>

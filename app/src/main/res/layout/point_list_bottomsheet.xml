@@ -14,17 +14,37 @@
     android:foregroundGravity="top"
     card_view:layout_anchorGravity="top">
 
-    <TextView
 
-
+    <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:elevation="5dp">
+
+        <TextView
+
+
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Saved places"
         android:textColor="@color/colorText"
         android:padding="16dp"
         android:textSize="18sp"
         android:gravity="top"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+            android:layout_weight="0.5"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text=""
+            android:ems="10"
+            android:id="@+id/searcSavedPlace"
+            android:layout_weight="0.5" />
+
+    </LinearLayout>
 
 
     <View

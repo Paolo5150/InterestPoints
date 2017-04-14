@@ -9,8 +9,14 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Paolo on 7/04/2017.
@@ -28,6 +34,7 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
     BottomSheetBehavior bsb;
 
     RecyclerView recView;
+    EditText searchSavedPlace;
     LinearLayoutManager layoutManager;
     ItemTouchHelper touchHelper;
     RecyclerAdapter adapter = null;
@@ -84,6 +91,50 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         IPDatabase.getInstance().AddListener(this);
 
         recView = (RecyclerView) bottomSheet.findViewById(R.id.recyclerView);
+        searchSavedPlace = (EditText) bottomSheet.findViewById(R.id.searcSavedPlace);
+        adapter = new RecyclerAdapter(act);
+        searchSavedPlace.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                //Fill recycler view with items which name matches sequence
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+    GlobalVariables.LogWithTag("Text changed -> " + s);
+
+                if(!searchSavedPlace.getText().toString().equalsIgnoreCase(""))
+                {
+                    List<InterestPoint> points = IPDatabase.getInstance().GetAllPoints();
+                    List<InterestPoint> matchingPoints = new ArrayList<InterestPoint>();
+
+                    for(InterestPoint p : points)
+                    {
+                        if(p.title.toLowerCase().contains(s.toString().toLowerCase())) {
+                            matchingPoints.add(p);
+                            GlobalVariables.LogWithTag("Added " + p.title);
+                        }
+                    }
+
+                    adapter = new RecyclerAdapter(act,matchingPoints);
+                    recView.setAdapter(adapter);
+
+                }
+                else {
+                    adapter = new RecyclerAdapter(act);
+
+                }
+
+                recView.setAdapter(adapter);
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         recView.setFocusable(false); //Very important to display the bottom sheet on the top!
       //  recView.setNestedScrollingEnabled(false);
 
@@ -91,9 +142,7 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         layoutManager = new LinearLayoutManager(act);
         recView.setLayoutManager(layoutManager);
 
-        adapter = new RecyclerAdapter(act);
 
-        recView.setAdapter(adapter);
 
 
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -111,10 +160,12 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
 
                 RecyclerAdapter.MyViewholder viewHolder2 = (RecyclerAdapter.MyViewholder) viewHolder;
 
-                GlobalVariables.LogWithTag("Swiped " + viewHolder2.title.getText() + " direction " + direction);
-                adapter.allPoints.remove(viewHolder.getAdapterPosition());
-                adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-                IPDatabase.getInstance().DeleteInterestPointByTitle(viewHolder2.title.getText().toString());
+               // GlobalVariables.LogWithTag("Swiped " + viewHolder2.title.getText() + " direction " + direction);
+
+                int viewPos = viewHolder.getAdapterPosition();
+                adapter.allPoints.remove(viewPos);
+               // adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+                IPDatabase.getInstance().DeleteInterestPointByTitle(viewHolder2.title.getText().toString(),viewPos);
 
             }
         };
@@ -124,6 +175,10 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         touchHelper = new ItemTouchHelper(callback);
 
         touchHelper.attachToRecyclerView(recView);
+
+
+
+        recView.setAdapter(adapter);
 
 
     }
@@ -144,6 +199,7 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
 
 
        Show();
+
         recView.scrollToPosition(index);
     }
 
@@ -182,14 +238,7 @@ private void SetBottomSheetHeightAccordingToContent()
 }
     public void Show()
     {
-
-
-
-       // bottomSheet.fullScroll(NestedScrollView.FOCUS_UP);
-
         bsb.setState(BottomSheetBehavior.STATE_EXPANDED);
-
-
     }
 
     public int GetState()
@@ -209,7 +258,10 @@ private void SetBottomSheetHeightAccordingToContent()
         bottomSheet.setVisibility(View.VISIBLE);
     }
     @Override
-    public void OnDatabaseChange(DATABASE_OPERATION operation) {
+    public void OnDatabaseChange(DATABASE_OPERATION operation, int itemPos) {
+
+
+
 
         SetBottomSheetHeightAccordingToContent();
 
@@ -221,8 +273,16 @@ private void SetBottomSheetHeightAccordingToContent()
             GlobalVariables.LogWithTag("Current height in dp " + currentHeight);
 
         }
-        else
-            adapter.notifyDataSetChanged();
+        else if(operation == DATABASE_OPERATION.EDIT_DESC ) {
+
+            //Need to create new adapter as it needs to pull new data from the database
+            adapter = new RecyclerAdapter(act);
+            recView.setAdapter(adapter);
+            GlobalVariables.LogWithTag("Change description position " + itemPos);
+        }
+        else if(operation ==  DATABASE_OPERATION.DELETE) {
+            adapter.notifyItemRemoved(itemPos);
+        }
 
         if(IPDatabase.getInstance().GetAllPoints().size()==0)
             Hide();

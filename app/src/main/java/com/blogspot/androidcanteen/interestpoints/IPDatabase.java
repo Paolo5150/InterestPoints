@@ -73,13 +73,13 @@ public static IPDatabase getInstance()
         GlobalVariables.LogWithTag("Upgrade called");
     }
 
-    private void NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION operation)
+    private void NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION operation, int itemPos)
     {
 
         int iii = 0;
         for(IDatabaseListener lis : listeners) {
             iii++;
-            lis.OnDatabaseChange(operation);
+            lis.OnDatabaseChange(operation,itemPos);
         }
 
         GlobalVariables.LogWithTag("Num of listeners " + iii);
@@ -98,7 +98,10 @@ public static IPDatabase getInstance()
 
 
        boolean ret =  db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
-        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.EDIT);
+
+        InterestPoint p = getPointById(id);
+        int index = GetIndexOfItem(p.title);
+        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.EDIT_BOOL,index);
         return ret;
         //  db.replace(TABLE_NAME,null,cv);
         //db.close();
@@ -127,7 +130,7 @@ public static IPDatabase getInstance()
         return -1;
     }
 
-    public boolean ReplacePointDescription(String id,String value)
+    public boolean ReplacePointDescription(String id,String value, int viewPosition)
     {
         db = getWritableDatabase();
 
@@ -139,18 +142,10 @@ public static IPDatabase getInstance()
 
         boolean ret =   db.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{id}) > 0;
 
-       // NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.EDIT);
+
+       NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.EDIT_DESC,viewPosition);
 
         return ret;
-        //  db.replace(TABLE_NAME,null,cv);
-        //db.close();
-
-      /*  InterestPoint p = getPointById(id);
-
-        if(p!=null)
-        {
-            GlobalVariables.LogWithTag(p.title + " boolean in database is " + p.notifyWhenClose);
-        }*/
 
 
     }
@@ -199,21 +194,9 @@ db = getReadableDatabase();
         }
     }
 
-    public void DeleteInterestPointById(String id)
-    {
-        InterestPoint p = getPointById(id);
-         db = getWritableDatabase();
 
-        db.delete(TABLE_NAME,COLUMN_ID + " = ?",new String[]{id});
-        db.close();
 
-        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.DELETE);
-
-        GlobalVariables.ToastShort(p.title + " deleted");
-
-    }
-
-    public void DeleteInterestPointByTitle(String title)
+    public void DeleteInterestPointByTitle(String title, int viewPosition)
     {
         InterestPoint p = getPointByTitle(title);
         db = getWritableDatabase();
@@ -223,7 +206,7 @@ db = getReadableDatabase();
 
         GlobalVariables.ToastShort(p.title + " deleted");
 
-        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.DELETE);
+        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.DELETE,viewPosition);
 
     }
 
@@ -281,7 +264,7 @@ db = getReadableDatabase();
 
       //  printAllPoints();
 
-        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.ADD);
+        NotifyAllListeners(IDatabaseListener.DATABASE_OPERATION.ADD,-1);
 
     }
 }

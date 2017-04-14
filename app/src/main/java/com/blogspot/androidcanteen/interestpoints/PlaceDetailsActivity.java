@@ -28,6 +28,7 @@ public class PlaceDetailsActivity extends AppCompatActivity{
 
     CardView placeCard;
     public AutofitTextView titleTextView;
+    public AutofitTextView typeTextView;
     public TextView addressTextView;
     public TextView phoneTextView;
     public TextView websiteTextView;
@@ -66,7 +67,7 @@ public class PlaceDetailsActivity extends AppCompatActivity{
                     collapsingToolbarLayout.setTitle(point.title);
                     isShow = true;
                 } else if(isShow) {
-                    collapsingToolbarLayout.setTitle(" ");//carefull there should a space between double quote otherwise it wont work
+                  //  collapsingToolbarLayout.setTitle(" ");//carefull there should a space between double quote otherwise it wont work
                     isShow = false;
                 }
             }
@@ -76,6 +77,7 @@ public class PlaceDetailsActivity extends AppCompatActivity{
 
         placeCard = (CardView) findViewById(R.id.placeDetailsCard);
         titleTextView = (AutofitTextView) findViewById(R.id.theTitle);
+        typeTextView = (AutofitTextView) findViewById(R.id.theType);
         addressTextView = (TextView)findViewById(R.id.address);
         phoneTextView = (TextView)findViewById(R.id.phoneNumber);
         websiteTextView = (TextView)findViewById(R.id.website);
@@ -91,14 +93,14 @@ public class PlaceDetailsActivity extends AppCompatActivity{
 
         String link = RequestUtils.getLinkForPlaceDetails(point.id);
 
-        if(GlobalVariables.isNetworkAvailable())
+      /*  if(GlobalVariables.isNetworkAvailable())
         {
-        RequestPlaceDetailsAsyncTask task = new RequestPlaceDetailsAsyncTask(this);
-        task.execute(link);}
+       // RequestPlaceDetailsAsyncTask task = new RequestPlaceDetailsAsyncTask(this);
+     //   task.execute(link);}
         else {
             GlobalVariables.ToastShort("Internet connection required");
             finish();
-        }
+        }*/
 
 
 

@@ -9,7 +9,8 @@ public interface IDatabaseListener {
     enum DATABASE_OPERATION
     {ADD,
     DELETE,
-        EDIT}
+        EDIT_DESC,
+    EDIT_BOOL}
 
-    void OnDatabaseChange(DATABASE_OPERATION operation);
+    void OnDatabaseChange(DATABASE_OPERATION operation, int itemPosition);
 }

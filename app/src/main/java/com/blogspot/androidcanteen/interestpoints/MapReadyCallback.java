@@ -455,7 +455,7 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
     }
 
     @Override
-    public void OnDatabaseChange(DATABASE_OPERATION operation) {
+    public void OnDatabaseChange(DATABASE_OPERATION operation, int itemPos) {
 
      //   if(operation == DATABASE_OPERATION.EDIT)
         UpdateMarkers();

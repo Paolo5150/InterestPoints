@@ -2,6 +2,7 @@ package com.blogspot.androidcanteen.interestpoints;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.view.View;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -20,44 +21,22 @@ import java.net.URL;
 
 public class RequestPlaceDetailsAsyncTask extends AsyncTask<String,Void,String> {
 
-    PlaceDetailsActivity detailsActivity;
-    ProgressDialog dialog;
+    IRequestListener listener;
 
-    public RequestPlaceDetailsAsyncTask(PlaceDetailsActivity detailsActivity)
+
+    public RequestPlaceDetailsAsyncTask(IRequestListener listener)
     {
-     this.detailsActivity = detailsActivity;
+     this.listener = listener;
     }
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
 
-        detailsActivity.mainContent.setAlpha(0);
-        dialog = new ProgressDialog(detailsActivity);
-        this.dialog.setMessage("Getting place details...");
-        this.dialog.show();
-    }
 
     @Override
     protected void onPostExecute(String result) {
 
-        this.dialog.dismiss();
-        detailsActivity.mainContent.setAlpha(1);
-        PlaceDetailsJsonObject jsonResult = new PlaceDetailsJsonObject(result);
+      listener.OnRequestCompleted(IRequestListener.RequestTypes.DETAILS,result);
 
-        detailsActivity.addressTextView.setText(jsonResult.formattedAddress);
-        detailsActivity.phoneTextView.setText(jsonResult.phone);
-        detailsActivity.websiteTextView.setText(jsonResult.website);
 
-        TextView ratingsTextView = (TextView) detailsActivity.findViewById(R.id.ratingNumber);
-        ratingsTextView.setText(jsonResult.rating);
-
-        RatingBar bars = (RatingBar) detailsActivity.findViewById(R.id.ratingStars);
-        bars.setIsIndicator(true);
-        bars.setRating(jsonResult.getRatingsFloat());
-
-       detailsActivity.openingHoursTextView.setText(jsonResult.openingHours);
-        detailsActivity.openingHoursDaysTextView.setText(jsonResult.days);
         super.onPostExecute(result);
     }
 

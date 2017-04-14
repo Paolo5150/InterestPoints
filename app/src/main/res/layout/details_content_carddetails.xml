@@ -11,6 +11,18 @@
     >
 
 
+    <TextView
+        android:text=""
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/titleTextView"
+        android:gravity="center"
+        android:textSize="36sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
 
     <LinearLayout
             android:orientation="horizontal"

@@ -6,10 +6,12 @@
     To save a place, long click on any point on the map, or search a place by name at the top.
 
 
-    <string name="infoDialogPlacesActivity">Here you can see all your saved places. Click on the icon on the bottom right for more options. To see your description, click on a place card. To delete a place, swipe it away!</string>
+    <string name="infoDialogPlacesActivity">Here you can see all your saved places. To see your description, click on a place card. To delete a place, swipe it away!</string>
     <string name="infoDialogSavePlace">To save a place, long click on any point on the map, or search a place by name at the top.</string>
     <string name="infoDialogTracking">Tracking will now start and the app will close. You will get notified when you are near places you saved. The tracking will automatically stop when you reopen the app.</string>
     <string name="title_activity_place_details">PlaceDetailsActivity</string>
+
+
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
@@ -99,4 +101,6 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
+    <string name="title_activity_place_details_tab">PlaceDetailsTabActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

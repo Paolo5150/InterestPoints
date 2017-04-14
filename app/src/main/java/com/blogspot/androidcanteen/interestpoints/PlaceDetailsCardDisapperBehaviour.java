@@ -24,11 +24,8 @@ public class PlaceDetailsCardDisapperBehaviour extends CoordinatorLayout.Behavio
 
    float maximumDifference = 0;
 
-    View dep;
-
     public PlaceDetailsCardDisapperBehaviour(Context context, AttributeSet attrs) {
         super(context, attrs);
-
 
     }
 
@@ -38,27 +35,9 @@ public class PlaceDetailsCardDisapperBehaviour extends CoordinatorLayout.Behavio
         return dependency instanceof NestedScrollView;
     }
 
-
-    @Override
-    public void onNestedScroll(CoordinatorLayout coordinatorLayout, CardView child, View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-        super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed);
-
-
-
-
-    }
-
-    @Override
-    public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, CardView child, View directTargetChild, View target, int nestedScrollAxes) {
-
-
-        return nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL;
-    }
-
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, CardView child, View dependency) {
-
 
         int targetLoc[] = new int[2];
         dependency.getLocationInWindow(targetLoc);
@@ -66,7 +45,7 @@ public class PlaceDetailsCardDisapperBehaviour extends CoordinatorLayout.Behavio
         int[] childLocation = new int[2];
         child.getLocationInWindow(childLocation);
 
-float YThreshold = GlobalVariables.DpToPx(100);
+        float YThreshold = GlobalVariables.DpToPx(100);
 
         if(maximumDifference==0)
             maximumDifference = childLocation[1] - YThreshold;
@@ -82,9 +61,6 @@ float YThreshold = GlobalVariables.DpToPx(100);
 
         child.setScaleX(perc);
         child.setScaleY(perc);
-
-        //GlobalVariables.LogWithTag("Perc " + perc);
-
 
         return false;
     }
