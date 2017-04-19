@@ -64,14 +64,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     }
 
-
-
-
     public class MyViewholder extends RecyclerView.ViewHolder
     {
-
-
-
         TextView title;
         TextView decription;
         TextView address;
@@ -103,15 +97,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
             flipStatus = new HashMap<>(getItemCount());
 
-
-
             for(int i=0; i< getItemCount();i++)
             {
                 flipStatus.put(i,false);
             }
-
-
-
 
             rotateToBack = ObjectAnimator.ofFloat(itemView, "rotationX", 0.0f, 180f);
             rotateToBack.setDuration(rotationRudation);
@@ -154,8 +143,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
             frontAlpha  = ObjectAnimator.ofFloat(cardFront, "alpha", 1.0f, 0.0f);
             frontAlpha.setDuration(0);
             frontAlpha.setStartDelay(rotationRudation/2);
-
-
 
             backAlpha = ObjectAnimator.ofFloat(cardBack, "alpha", 0.0f, 1.0f);
             backAlpha.setDuration(0);

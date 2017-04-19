@@ -140,8 +140,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         CheckcurrentGPSstatus();
 
-        if (mapCall != null && mapCall.map != null)
+        if (mapCall != null && mapCall.map != null) {
             mapCall.UpdateMarkers();
+
+        }
     }
 
 
@@ -247,6 +249,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             panel.Hide();
         }
     }
+
+    @Override
+    public void onBackPressed() {
+
+        if(bottomSheet.bsb.getState() == BottomSheetBehavior.STATE_EXPANDED)
+            bottomSheet.Hide();
+        else
+            finish();
+    }
+
     private void SetUpToolbar() {
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);

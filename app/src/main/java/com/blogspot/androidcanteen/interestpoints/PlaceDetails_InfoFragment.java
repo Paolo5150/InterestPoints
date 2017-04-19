@@ -31,13 +31,16 @@ public class PlaceDetails_InfoFragment extends Fragment{
     public LinearLayout mainContent;
 
     public View rootView;
-
+    PlaceDetailsTabActivity act;
 
 
     public PlaceDetails_InfoFragment() {
 
     }
 
+    public PlaceDetails_InfoFragment(PlaceDetailsTabActivity placeDetailsTabActivity) {
+        act = placeDetailsTabActivity;
+    }
 
 
     @Override
@@ -55,6 +58,7 @@ public class PlaceDetails_InfoFragment extends Fragment{
         mainContent = (LinearLayout) rootView.findViewById(R.id.main_content_layout);
 
         progBar = (ProgressBar) rootView.findViewById(R.id.progBar);
+     //   progBar.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
         progBar.setVisibility(View.VISIBLE);
         mainContent.setAlpha(0);
 

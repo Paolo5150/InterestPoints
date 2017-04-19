@@ -324,7 +324,7 @@ public class TrackingService extends Service {
         isTracking = false;
         notManager.cancel(TRACKING_NOTIFICATION_ID);
 
-        Notification not = new Notification.Builder(this)
+      /*  Notification not = new Notification.Builder(this)
                 .setContentTitle("Tracking was interrupted")
 
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)
@@ -333,7 +333,7 @@ public class TrackingService extends Service {
                 .setSound(notificationsound)
                 .setAutoCancel(true).build();
 
-        notManager.notify(1234,not);
+        notManager.notify(1234,not);*/
 
         super.onDestroy();
     }

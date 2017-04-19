@@ -3,6 +3,7 @@ package com.blogspot.androidcanteen.interestpoints;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.Locator;
 
 public class PlaceDetailsJsonObject
 {
@@ -11,6 +12,7 @@ public class PlaceDetailsJsonObject
     private String key_rating = "rating";
     private String key_name = "name";
     private String key_result = "result";
+    private String key_status = "status";
     private String key_form_address = "formatted_address";
     private String key_website = "website";
     private String key_types = "types";
@@ -19,6 +21,7 @@ public class PlaceDetailsJsonObject
     private String key_weekday_text = "weekday_text";
     private String key_photo = "photos";
     private String key_photo_ref = "photo_reference";
+    private String key_reviews = "reviews";
 
 
     public String rating;
@@ -37,22 +40,50 @@ public class PlaceDetailsJsonObject
     JSONArray photosObjs;
     public String[] photosRefs;
 
+    JSONArray reviews;
+    ReviewObject[] allReviews;
 
-    public PlaceDetailsJsonObject(String taskResult)
+
+    public PlaceDetailsJsonObject()
     {
+    }
 
+    public boolean CreateJsonObject(String taskResult)
+    {
         JSONObject obj = null;
-                JSONObject result = null;
+        JSONObject result = null;
+        JSONObject status = null;
+
         try {
             obj = new JSONObject(taskResult);
-            result = obj.getJSONObject(key_result);
-
         } catch (JSONException e) {
-            GlobalVariables.LogWithTag("JSon result exception");
+            GlobalVariables.LogWithTag("Could not create jsonObject");
         }
 
-        if(result==null)
-            GlobalVariables.LogWithTag("Result is null");
+
+        try {
+
+
+            String stat = obj.getString(key_status);
+
+            GlobalVariables.LogWithTag("STATUS: " + stat);
+
+
+
+        } catch (JSONException e) {
+
+        }
+
+        try {
+            result = obj.getJSONObject(key_result);
+        } catch (JSONException e) {
+            GlobalVariables.LogWithTag("JSon result exception: " + e.getMessage());
+        }
+
+        if(result==null) {
+
+            return false;
+        }
 
         //Name
         try {
@@ -67,7 +98,7 @@ public class PlaceDetailsJsonObject
             rating = result.getString(key_rating);
         } catch (JSONException e) {
             GlobalVariables.LogWithTag("Ratings exception");
-            rating = "Not available";
+            rating = "N/A";
         }
 
         //Photos
@@ -76,19 +107,23 @@ public class PlaceDetailsJsonObject
 
             GlobalVariables.LogWithTag("PHOTOS: " + photosObjs.length());
 
-            photosRefs = new String[photosObjs.length()];
+            if(photosObjs.length()!=0) {
+                photosRefs = new String[photosObjs.length()];
 
-            for(int i=0; i<photosRefs.length;i++)
-            {
-              JSONObject photo = photosObjs.getJSONObject(i);
+                for (int i = 0; i < photosRefs.length; i++) {
+                    JSONObject photo = photosObjs.getJSONObject(i);
 
-              photosRefs[i] = photo.getString(key_photo_ref);
+                    photosRefs[i] = photo.getString(key_photo_ref);
 
+                }
             }
+            else
+                photosRefs = null;
 
 
 
         } catch (JSONException e) {
+            photosRefs = new String[0];
             GlobalVariables.LogWithTag("Photos exception:" + e.getMessage());
         }
 
@@ -106,6 +141,25 @@ public class PlaceDetailsJsonObject
         } catch (JSONException e) {
             GlobalVariables.LogWithTag("Address exception");
             formattedAddress = "Not available";
+        }
+
+        //Reviews
+
+        try {
+            reviews = result.getJSONArray(key_reviews);
+          //  GlobalVariables.LogWithTag("Reviews: " + reviews.length());
+
+            allReviews = new ReviewObject[reviews.length()];
+
+            for(int i=0; i<reviews.length();i++)
+            {
+                allReviews[i] = new ReviewObject(reviews.getJSONObject(i));
+            }
+
+        } catch (JSONException e) {
+            GlobalVariables.LogWithTag("Reviews exception");
+            allReviews = new ReviewObject[0];
+            e.printStackTrace();
         }
 
         //Website
@@ -140,7 +194,7 @@ public class PlaceDetailsJsonObject
             GlobalVariables.LogWithTag("Type exception");
         }
 
-    //Open now
+        //Open now
         JSONObject opening = null;
         try {
             opening = result.getJSONObject(key_opening_hours);
@@ -185,8 +239,7 @@ public class PlaceDetailsJsonObject
             }
         }
 
-
-
+        return true;
 
     }
 
@@ -195,7 +248,7 @@ public class PlaceDetailsJsonObject
 
         float f = 0;
 
-        if(!rating.equalsIgnoreCase("Not available"))
+        if(!rating.equalsIgnoreCase("N/A"))
         f = Float.parseFloat(rating);
 
         return f;
@@ -216,5 +269,75 @@ public class PlaceDetailsJsonObject
         }
 
         return res;
+    }
+}
+
+class ReviewObject
+{
+
+    String key_rating = "rating";
+    String key_author = "author_name";
+    String key_author_url = "author_url";
+    String key_time = "time";
+    String key_text = "text";
+
+
+    String rating = "";
+    String author= "";
+    String author_url= "";
+    String text= "";
+    String time= "";
+
+    public ReviewObject(JSONObject reviewJSON)
+    {
+        try {
+            rating = reviewJSON.getString(key_rating);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            author = reviewJSON.getString(key_author);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            author_url = reviewJSON.getString(key_author_url);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            time = reviewJSON.getString(key_time);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            text = reviewJSON.getString(key_text);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public float getRatingFloat()
+    {
+        float f = 0;
+
+        if(rating!="")
+        f = Float.parseFloat(rating);
+        return f;
+    }
+
+    public String getTimeText()
+    {
+        long t = Long.parseLong(time);
+
+        String ti = GlobalVariables.Epoch2DateString(t);
+
+        return ti;
+
+
     }
 }

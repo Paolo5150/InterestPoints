@@ -16,6 +16,8 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Handler;
@@ -127,6 +129,12 @@ public class GlobalVariables {
         dialog.show();
 
 
+    }
+
+    public static String Epoch2DateString(long epochSeconds) {
+        Date updatedate = new Date(epochSeconds * 1000);
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+        return format.format(updatedate);
     }
 
     public static void ShowAlertDialog(Activity act, String message, long delay) {

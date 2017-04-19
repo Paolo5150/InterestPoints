@@ -103,4 +103,5 @@
     </string>
     <string name="title_activity_place_details_tab">PlaceDetailsTabActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_image_gallery">ImageGalleryActivity</string>
 </resources>

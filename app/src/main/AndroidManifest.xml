@@ -42,6 +42,11 @@
             android:name=".PlaceDetailsTabActivity"
             android:label="@string/title_activity_place_details_tab"
             android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ImageGalleryActivity"
+            android:label="@string/title_activity_image_gallery"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

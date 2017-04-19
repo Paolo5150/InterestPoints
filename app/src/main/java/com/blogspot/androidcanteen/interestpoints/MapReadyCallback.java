@@ -166,18 +166,52 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
 
         currentLocation = location;
 
+    DrawCircleAndRange(false);
+    }
+
+    public void DrawCircleAndRange(boolean reset) {
+
+        if(map==null)
+            return;
+
+        float radius = (float) ((float) (Math.pow(2, (21 - map.getCameraPosition().zoom))) * 1128.497220 * 0.0027)/6;
 
 
-        if(userCircle!=null)
-            userCircle.remove();
+        if(currentLocation!=null)
+        {
+           // GlobalVariables.LogWithTag("Technically im drawing: " + radius);
 
-        if(range!=null)
-            range.remove();
+            if(userCircle==null || reset) {
+                userCircle = map.addCircle(new CircleOptions().strokeWidth(2).strokeColor(Color.YELLOW).radius(radius).fillColor(Color.BLUE).center((new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))));
+                userCircle.setClickable(true);
 
 
 
-        userCircle = map.addCircle(new CircleOptions().zIndex(1000).strokeWidth(2).strokeColor(Color.YELLOW).radius(3).fillColor(Color.BLUE).center(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
-        range = map.addCircle(new CircleOptions().radius(MyOptions.meterRange).fillColor(Color.argb(80,160,160,160)).center(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+            }
+
+
+            if(range==null || reset) {
+                range = map.addCircle(new CircleOptions().fillColor(Color.argb(80, 160, 160, 160)).radius(MyOptions.meterRange).center(new LatLng(0, 0)));
+
+            }
+
+
+            userCircle.setRadius(radius);
+            userCircle.setCenter((new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+
+            range.setCenter((new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+            range.setRadius(MyOptions.meterRange);
+
+
+        }
+        else
+        {
+           // userCircle.setVisible(false);
+           // range.setVisible(false);
+            GlobalVariables.LogWithTag("TURNED OFF");
+        }
+
+
 
     }
 
@@ -205,6 +239,7 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
         map.getUiSettings().setCompassEnabled(true);
         map.setPadding(0, (int) mapPadding, 0, 0);
 
+       DrawCircleAndRange(false);
 
 
         UpdateMarkers();
@@ -227,6 +262,17 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
             }
         });
 
+        map.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+            @Override
+            public void onCircleClick(Circle circle) {
+
+
+                    GlobalVariables.LogWithTag("Clicked on CIRCLE");
+                AdjustRange();
+
+            }
+        });
+
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng)
@@ -236,6 +282,17 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
                 if(act.bottomSheet.GetState() == BottomSheetBehavior.STATE_EXPANDED)
                     act.bottomSheet.Hide();
 
+
+
+            }
+        });
+
+        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+
+              //  GlobalVariables.LogWithTag("Zoom changing");
+                DrawCircleAndRange(false);
 
             }
         });
@@ -300,6 +357,10 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
 
     }
 
+    private void AdjustRange() {
+
+        AdjustRangeDialog dialog = new AdjustRangeDialog(act);
+    }
 
 
     public void startLocationRequest() {
@@ -378,6 +439,10 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
 
         if(currentLocation!=null)
             UpdateLocation(currentLocation);
+
+        //Map is clear, redraw circle
+        DrawCircleAndRange(true);
+
     }
 
     public void SetUpListeners()

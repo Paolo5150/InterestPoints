@@ -93,12 +93,21 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         recView = (RecyclerView) bottomSheet.findViewById(R.id.recyclerView);
         searchSavedPlace = (EditText) bottomSheet.findViewById(R.id.searcSavedPlace);
         adapter = new RecyclerAdapter(act);
+
+        searchSavedPlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Show();
+            }
+        });
+
         searchSavedPlace.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
                 //Fill recycler view with items which name matches sequence
             }
+
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
