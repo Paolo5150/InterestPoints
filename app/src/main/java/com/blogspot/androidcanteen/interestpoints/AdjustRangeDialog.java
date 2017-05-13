@@ -3,7 +3,9 @@ package com.blogspot.androidcanteen.interestpoints;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.IntegerRes;
@@ -30,7 +32,7 @@ public class AdjustRangeDialog {
 
 
 
-    public AdjustRangeDialog(Activity act)
+    public AdjustRangeDialog(final Activity act)
     {
 
         this.act = act;
@@ -51,7 +53,9 @@ public class AdjustRangeDialog {
         textValuel = (TextView)view.findViewById(R.id.sliderValue);
         slider = (SeekBar)view.findViewById(R.id.rangeSlider);
 
-        textValuel.setText(String.valueOf(MyOptions.meterRange));
+
+
+        SetText();
 
         originalValue = MyOptions.meterRange;
 
@@ -71,7 +75,7 @@ public class AdjustRangeDialog {
                 if(MyOptions.meterRange >= MyOptions.MAX_RANGE)
                     MyOptions.meterRange = MyOptions.MAX_RANGE;
 
-                textValuel.setText(String.valueOf(MyOptions.meterRange));
+                SetText();
 
                 GlobalVariables.LogWithTag("Progress changed " + MyOptions.meterRange);
 
@@ -95,7 +99,13 @@ public class AdjustRangeDialog {
                     public void onClick(DialogInterface dialog,
                                         int which) {
 
+               //Save to shared preferences
 
+                        SharedPreferences sp = act.getSharedPreferences("Range", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor edit = sp.edit();
+
+                        edit.putInt("Range",MyOptions.meterRange);
+                        edit.commit();
                         dialog.dismiss();
                     }
                 });
@@ -105,7 +115,7 @@ public class AdjustRangeDialog {
             public void onClick(DialogInterface dialog, int which) {
 
                 MyOptions.meterRange = originalValue;
-                textValuel.setText(String.valueOf(MyOptions.meterRange));
+                SetText();
                 dialog.dismiss();
             }
         });
@@ -116,5 +126,9 @@ public class AdjustRangeDialog {
 
 
 
+    }
+
+    private void SetText() {
+        textValuel.setText(String.valueOf(MyOptions.meterRange) + " (meters)");
     }
 }

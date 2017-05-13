@@ -216,6 +216,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
        binding = true;
 
         final InterestPoint point = allPoints.get(position);
+        GlobalVariables.LogWithTag("Bound view position: " + position);
 
         holder.title.setText(point.title);
         holder.decription.setText(point.description);
@@ -227,8 +228,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
             @Override
             public void onClick(View v) {
 
-                if(binding)
-                    return;
+            //    if(binding)
+               //     return;
 
                 PopupMenu options = new PopupMenu(act,holder.placeOptions);
 
@@ -248,7 +249,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
                             act.bottomSheet.Hide();
 
                             // GlobalVariables.LogWithTag("Main activity got: " + data.getStringExtra("place_title"));
-                            InterestPoint point = IPDatabase.getInstance().getPointByTitle(allPoints.get(position).title);
+                           // point = IPDatabase.getInstance().getPointByTitle(allPoints.get(position).title);
 
                             act.mapCall.MoveGentlyToPosition(point.getLatLng(),18);
                           //  act.setResult(VIEW_ON_MAP_REQUEST, pointReturned);
@@ -260,13 +261,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
                         //Edit description
                         else if(item.getItemId() == R.id.editDescription)
                         {
-
+                            final int myPos = position;
                             holder.FlipToBack();
                             NewPlaceDialog dialog = new NewPlaceDialog(act, point.title,new IDialogListener() {
                                 @Override
                                 public void OnOKButtonPressed(String description) {
 
-                                    IPDatabase.getInstance().ReplacePointDescription(point.id,description,position);
+                                    IPDatabase.getInstance().ReplacePointDescription(point.id,description,myPos);
 
 
                                 }
@@ -292,12 +293,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         });
 
 
+        final InterestPoint p = allPoints.get(position);
 
         holder.notifyBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                InterestPoint p = allPoints.get(position);
+
 
               IPDatabase.getInstance().ReplacePointBoolean(p.id,isChecked);
 

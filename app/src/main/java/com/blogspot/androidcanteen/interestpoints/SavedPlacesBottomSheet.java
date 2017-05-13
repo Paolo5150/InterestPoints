@@ -1,6 +1,7 @@
 package com.blogspot.androidcanteen.interestpoints;
 
 import android.app.Activity;
+import android.graphics.Point;
 import android.support.annotation.FractionRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -11,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Display;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -25,8 +27,8 @@ import java.util.List;
 public class SavedPlacesBottomSheet implements IDatabaseListener {
 
     private static final float SINGLE_CARD_HEIGHT = 245 ;
-    final int PEEK_HEIGHT = 150;
-    final int SHEET_HEIGHT = 550;
+    int PEEK_HEIGHT = 150;
+    int SHEET_HEIGHT = 550; //Reassigned in constructor
 
     MainActivity act;
 
@@ -52,6 +54,17 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
         di = new Infodialog(act);
 
         bsb = BottomSheetBehavior.from(bottomSheet);
+
+        //Get screen dimenstions
+        Display display = act.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+
+        int heightDp = (int)GlobalVariables.convertPixelsToDp((float)height,act);
+
+        SHEET_HEIGHT = heightDp - heightDp/4;
 
         bsb.setPeekHeight(PEEK_HEIGHT);
         bsb.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -173,6 +186,7 @@ public class SavedPlacesBottomSheet implements IDatabaseListener {
 
                 int viewPos = viewHolder.getAdapterPosition();
                 adapter.allPoints.remove(viewPos);
+                GlobalVariables.LogWithTag("Adapter has " + adapter.allPoints.size());
                // adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
                 IPDatabase.getInstance().DeleteInterestPointByTitle(viewHolder2.title.getText().toString(),viewPos);
 
@@ -287,10 +301,19 @@ private void SetBottomSheetHeightAccordingToContent()
             //Need to create new adapter as it needs to pull new data from the database
             adapter = new RecyclerAdapter(act);
             recView.setAdapter(adapter);
-            GlobalVariables.LogWithTag("Change description position " + itemPos);
+
         }
         else if(operation ==  DATABASE_OPERATION.DELETE) {
             adapter.notifyItemRemoved(itemPos);
+          // adapter.notifyItemRangeChanged(itemPos, adapter.allPoints.size());
+
+
+            GlobalVariables.LogWithTag("All point in listener: " + adapter.allPoints.size());
+            GlobalVariables.LogWithTag("Adapter count: " + adapter.getItemCount());
+
+       //     adapter.notifyDataSetChanged();
+
+
         }
 
         if(IPDatabase.getInstance().GetAllPoints().size()==0)

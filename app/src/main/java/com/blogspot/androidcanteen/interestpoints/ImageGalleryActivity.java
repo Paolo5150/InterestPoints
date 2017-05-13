@@ -1,5 +1,6 @@
 package com.blogspot.androidcanteen.interestpoints;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -107,6 +108,7 @@ public class ImageGalleryActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
+    @SuppressLint("ValidFragment")
     public static class PlaceholderFragment extends Fragment implements IRequestListener {
 
         public PhotoView imageLarge;
@@ -118,6 +120,14 @@ public class ImageGalleryActivity extends AppCompatActivity {
         PhotoResult myResult = null;
 
         public int restartAttempts = 3;
+
+        public PlaceholderFragment() {
+
+
+        }
+
+
+
 
         public PlaceholderFragment(ImageGalleryActivity act, String linkToImage) {
 

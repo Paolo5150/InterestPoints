@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -182,7 +183,8 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
            // GlobalVariables.LogWithTag("Technically im drawing: " + radius);
 
             if(userCircle==null || reset) {
-                userCircle = map.addCircle(new CircleOptions().strokeWidth(2).strokeColor(Color.YELLOW).radius(radius).fillColor(Color.BLUE).center((new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))));
+                userCircle = map.addCircle(new CircleOptions().strokeWidth(2).strokeColor(Color.YELLOW).radius(radius).fillColor(Color.BLUE).zIndex(50).center((new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))));
+
                 userCircle.setClickable(true);
 
 
@@ -198,6 +200,7 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
 
             userCircle.setRadius(radius);
             userCircle.setCenter((new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+            userCircle.setZIndex(50);
 
             range.setCenter((new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
             range.setRadius(MyOptions.meterRange);
@@ -238,6 +241,12 @@ public class MapReadyCallback implements OnMapReadyCallback,IDatabaseListener {
         map.setMyLocationEnabled(false);
         map.getUiSettings().setCompassEnabled(true);
         map.setPadding(0, (int) mapPadding, 0, 0);
+
+        //Get range from shared pref
+
+        SharedPreferences sp = act.getSharedPreferences("Range",Context.MODE_PRIVATE);
+
+        MyOptions.meterRange = sp.getInt("Range",350);
 
        DrawCircleAndRange(false);
 
